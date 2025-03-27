@@ -1,0 +1,10 @@
+D:\for work\temp\workshorp\PC\comport\ComPort_Charp\bin\Debug\ComPort_Charp.exe.config
+D:\for work\temp\workshorp\PC\comport\ComPort_Charp\bin\Debug\ComPort_Charp.exe
+D:\for work\temp\workshorp\PC\comport\ComPort_Charp\bin\Debug\ComPort_Charp.pdb
+D:\for work\temp\workshorp\PC\comport\ComPort_Charp\obj\Debug\ComPort_Charp.csproj.AssemblyReference.cache
+D:\for work\temp\workshorp\PC\comport\ComPort_Charp\obj\Debug\ComPort_Charp.Form1.resources
+D:\for work\temp\workshorp\PC\comport\ComPort_Charp\obj\Debug\ComPort_Charp.Properties.Resources.resources
+D:\for work\temp\workshorp\PC\comport\ComPort_Charp\obj\Debug\ComPort_Charp.csproj.GenerateResource.cache
+D:\for work\temp\workshorp\PC\comport\ComPort_Charp\obj\Debug\ComPort_Charp.csproj.CoreCompileInputs.cache
+D:\for work\temp\workshorp\PC\comport\ComPort_Charp\obj\Debug\ComPort_Charp.exe
+D:\for work\temp\workshorp\PC\comport\ComPort_Charp\obj\Debug\ComPort_Charp.pdb
