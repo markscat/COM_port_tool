@@ -53,6 +53,7 @@ namespace ComPort_Charp
             this.BuRecord = new System.Windows.Forms.Button();
             this.TextBoxIn = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
+            this.BtnSyncTime = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -69,7 +70,7 @@ namespace ComPort_Charp
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(12, 42);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(94, 12);
+            this.label1.Size = new System.Drawing.Size(118, 15);
             this.label1.TabIndex = 5;
             this.label1.Text = "Selected COM Port";
             // 
@@ -89,7 +90,7 @@ namespace ComPort_Charp
             this.board_rat.IntegralHeight = false;
             this.board_rat.Location = new System.Drawing.Point(134, 60);
             this.board_rat.Name = "board_rat";
-            this.board_rat.Size = new System.Drawing.Size(109, 20);
+            this.board_rat.Size = new System.Drawing.Size(109, 23);
             this.board_rat.TabIndex = 3;
             // 
             // BuClear
@@ -107,7 +108,7 @@ namespace ComPort_Charp
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(131, 42);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(92, 12);
+            this.label2.Size = new System.Drawing.Size(112, 15);
             this.label2.TabIndex = 6;
             this.label2.Text = "Selected BaudRate";
             // 
@@ -122,14 +123,13 @@ namespace ComPort_Charp
             this.textBoxOutput.Size = new System.Drawing.Size(727, 406);
             this.textBoxOutput.TabIndex = 4;
             this.textBoxOutput.SizeChanged += new System.EventHandler(this.Form1_Load);
-            //this.textBoxOutput.TextChanged += new System.EventHandler(this.TextBoxOutput_TextChanged);
             // 
             // comport
             // 
             this.comport.FormattingEnabled = true;
             this.comport.Location = new System.Drawing.Point(7, 60);
             this.comport.Name = "comport";
-            this.comport.Size = new System.Drawing.Size(121, 20);
+            this.comport.Size = new System.Drawing.Size(121, 23);
             this.comport.TabIndex = 2;
             // 
             // label3
@@ -138,7 +138,7 @@ namespace ComPort_Charp
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(767, 97);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(47, 12);
+            this.label3.Size = new System.Drawing.Size(59, 15);
             this.label3.TabIndex = 7;
             this.label3.Text = "Data Bits";
             // 
@@ -148,7 +148,7 @@ namespace ComPort_Charp
             this.Data_Bit.FormattingEnabled = true;
             this.Data_Bit.Location = new System.Drawing.Point(747, 112);
             this.Data_Bit.Name = "Data_Bit";
-            this.Data_Bit.Size = new System.Drawing.Size(121, 20);
+            this.Data_Bit.Size = new System.Drawing.Size(121, 23);
             this.Data_Bit.TabIndex = 8;
             // 
             // Stop_Bits
@@ -157,7 +157,7 @@ namespace ComPort_Charp
             this.Stop_Bits.FormattingEnabled = true;
             this.Stop_Bits.Location = new System.Drawing.Point(747, 159);
             this.Stop_Bits.Name = "Stop_Bits";
-            this.Stop_Bits.Size = new System.Drawing.Size(121, 20);
+            this.Stop_Bits.Size = new System.Drawing.Size(121, 23);
             this.Stop_Bits.TabIndex = 9;
             // 
             // label4
@@ -166,7 +166,7 @@ namespace ComPort_Charp
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(767, 144);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(47, 12);
+            this.label4.Size = new System.Drawing.Size(59, 15);
             this.label4.TabIndex = 10;
             this.label4.Text = "Stop Bits";
             // 
@@ -176,7 +176,7 @@ namespace ComPort_Charp
             this.label5.AutoSize = true;
             this.label5.Location = new System.Drawing.Point(767, 186);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(32, 12);
+            this.label5.Size = new System.Drawing.Size(41, 15);
             this.label5.TabIndex = 11;
             this.label5.Text = "Parity";
             // 
@@ -186,7 +186,7 @@ namespace ComPort_Charp
             this.Parity.FormattingEnabled = true;
             this.Parity.Location = new System.Drawing.Point(747, 204);
             this.Parity.Name = "Parity";
-            this.Parity.Size = new System.Drawing.Size(121, 20);
+            this.Parity.Size = new System.Drawing.Size(121, 23);
             this.Parity.TabIndex = 12;
             // 
             // label6
@@ -195,7 +195,7 @@ namespace ComPort_Charp
             this.label6.AutoSize = true;
             this.label6.Location = new System.Drawing.Point(767, 241);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(67, 12);
+            this.label6.Size = new System.Drawing.Size(83, 15);
             this.label6.TabIndex = 13;
             this.label6.Text = "Flow Control";
             // 
@@ -205,7 +205,7 @@ namespace ComPort_Charp
             this.Flow_Control.FormattingEnabled = true;
             this.Flow_Control.Location = new System.Drawing.Point(747, 256);
             this.Flow_Control.Name = "Flow_Control";
-            this.Flow_Control.Size = new System.Drawing.Size(121, 20);
+            this.Flow_Control.Size = new System.Drawing.Size(121, 23);
             this.Flow_Control.TabIndex = 14;
             // 
             // label7
@@ -214,7 +214,7 @@ namespace ComPort_Charp
             this.label7.AutoSize = true;
             this.label7.Location = new System.Drawing.Point(767, 301);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(71, 12);
+            this.label7.Size = new System.Drawing.Size(87, 15);
             this.label7.TabIndex = 15;
             this.label7.Text = "Read Timeout";
             // 
@@ -224,7 +224,7 @@ namespace ComPort_Charp
             this.ReadTimeout.FormattingEnabled = true;
             this.ReadTimeout.Location = new System.Drawing.Point(747, 316);
             this.ReadTimeout.Name = "ReadTimeout";
-            this.ReadTimeout.Size = new System.Drawing.Size(121, 20);
+            this.ReadTimeout.Size = new System.Drawing.Size(121, 23);
             this.ReadTimeout.TabIndex = 16;
             // 
             // WriteTimeout
@@ -233,7 +233,7 @@ namespace ComPort_Charp
             this.WriteTimeout.FormattingEnabled = true;
             this.WriteTimeout.Location = new System.Drawing.Point(747, 374);
             this.WriteTimeout.Name = "WriteTimeout";
-            this.WriteTimeout.Size = new System.Drawing.Size(121, 20);
+            this.WriteTimeout.Size = new System.Drawing.Size(121, 23);
             this.WriteTimeout.TabIndex = 18;
             // 
             // label8
@@ -242,7 +242,7 @@ namespace ComPort_Charp
             this.label8.AutoSize = true;
             this.label8.Location = new System.Drawing.Point(767, 359);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(76, 12);
+            this.label8.Size = new System.Drawing.Size(95, 15);
             this.label8.TabIndex = 17;
             this.label8.Text = "Write Timeout ";
             // 
@@ -258,11 +258,12 @@ namespace ComPort_Charp
             // 
             // TextBoxIn
             // 
-            this.TextBoxIn.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
+            this.TextBoxIn.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.TextBoxIn.Location = new System.Drawing.Point(4, 522);
             this.TextBoxIn.Name = "TextBoxIn";
-            this.TextBoxIn.Size = new System.Drawing.Size(727, 22); 
+            this.TextBoxIn.Size = new System.Drawing.Size(727, 25);
             this.TextBoxIn.TabIndex = 20;
             this.TextBoxIn.TextChanged += new System.EventHandler(this.TextBoxIn_TextChanged);
             // 
@@ -271,13 +272,24 @@ namespace ComPort_Charp
             this.label9.AutoSize = true;
             this.label9.Location = new System.Drawing.Point(7, 504);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(64, 12);
+            this.label9.Size = new System.Drawing.Size(80, 15);
             this.label9.TabIndex = 21;
             this.label9.Text = "Message Out";
+            // 
+            // BtnSyncTime
+            // 
+            this.BtnSyncTime.Location = new System.Drawing.Point(623, 59);
+            this.BtnSyncTime.Name = "BtnSyncTime";
+            this.BtnSyncTime.Size = new System.Drawing.Size(75, 23);
+            this.BtnSyncTime.TabIndex = 22;
+            this.BtnSyncTime.Text = "RTC";
+            this.BtnSyncTime.UseVisualStyleBackColor = true;
+            this.BtnSyncTime.Click += new System.EventHandler(this.BtnSyncTime_Click);
             // 
             // Form1
             // 
             this.ClientSize = new System.Drawing.Size(877, 581);
+            this.Controls.Add(this.BtnSyncTime);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.TextBoxIn);
             this.Controls.Add(this.BuRecord);
@@ -303,7 +315,6 @@ namespace ComPort_Charp
             this.Controls.Add(this.BuConnect);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
-            //this.Load += new System.EventHandler(this.Form1_Load_1);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -334,6 +345,7 @@ namespace ComPort_Charp
         private System.Windows.Forms.Button BuRecord;
         private System.Windows.Forms.TextBox TextBoxIn;
         private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Button BtnSyncTime;
     }
 }
 
