@@ -227,6 +227,9 @@ namespace ComPort_Charp
                         case "RTS/CTS":
                             handshake = Handshake.RequestToSend;
                             break;
+                        case "None": // 新增處理「None」的情況
+                            handshake = Handshake.None;
+                            break;
                         default:
                             MessageBox.Show("不支援此流量控制模式");
                             return;
