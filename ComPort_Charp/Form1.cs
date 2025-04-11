@@ -54,9 +54,11 @@ namespace ComPort_Charp
 
         // 變數用來記錄使用者輸入的內容
         private bool isRecording = false;
+        private readonly object _logLock = new object(); // 日誌寫入鎖
+        //private string _logFolder; // 日誌目錄
+        private readonly string _debugFolderPath; // 日誌目錄路徑
 
-    
-      
+
 
         /// <summary>
         /// 構造函數，初始化組件與串口
@@ -65,7 +67,39 @@ namespace ComPort_Charp
         {
             InitializeComponent();
             InitializeSerialPort();
+            _logLock = new object(); // 新增此行
+
+            //<0410 測試碼>
+
+            _debugFolderPath = Path.Combine(
+          AppDomain.CurrentDomain.BaseDirectory, // 執行檔所在目錄
+          "debug");
+
+            // 自動建立日誌目錄（如果不存在）
+            Directory.CreateDirectory(_debugFolderPath);
+            //</0410 測試碼>
+
         }
+        //<0410 新增;寫入除厝資訊>
+        private void WriteDebugLog(string fileName, string message)
+        {
+            try
+            {
+                string logPath = Path.Combine(_debugFolderPath, fileName);
+
+                // 使用 File.AppendAllText 自動處理檔案開啟/關閉
+                File.AppendAllText(logPath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss} {message}\n");
+            }
+            catch (Exception ex)
+            {
+                // 日誌寫入失敗時可在此處理（例如顯示警告）
+                MessageBox.Show($"日誌寫入失敗: {ex.Message}");
+            }
+        }
+
+
+
+        //</0410 新增;寫入除錯資訊>
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (_serialPort.IsOpen)
@@ -90,8 +124,10 @@ namespace ComPort_Charp
         private void InitializeSerialPort() {
             this.Text = "串口通訊工具"; // 設定視窗標題
 
-            _serialPort = new SerialPort();
-            _serialPort.Encoding=Encoding.Unicode;
+            _serialPort = new SerialPort
+            {
+                Encoding = Encoding.UTF8
+            };
 
             // 統一使用字串填充波特率
             board_rat.Items.AddRange(new object[] { 9600, 19200, 38400, 57600, 115200, 256000 });
@@ -153,15 +189,16 @@ namespace ComPort_Charp
         private void Form1_Load(object sender, EventArgs e)
         {
             /** 在ComboBox中填充所有串口名稱*/
-            comport.Items.AddRange(SerialPort.GetPortNames());
+            //comport.Items.AddRange(SerialPort.GetPortNames());
 
         }
 
 
         /// <summary>
-        /// 連接/斷開串口
-        /// </summary>
         /// 
+        /**  @brief	 BuConnect_Click 連接/斷開串口
+         *  </summary>
+        */ 
 
         private void BuConnect_Click(object sender, EventArgs e)
         {
@@ -195,24 +232,23 @@ namespace ComPort_Charp
                     // 處理停止位元轉換
 
                     string stopBitsText = Stop_Bits.SelectedItem.ToString();
-                    string stopBitsMapped;
+                    //string stopBitsMapped;
+
                     switch (stopBitsText)
                     {
                         case "1":
-                            stopBitsMapped = "One";
-                            break;
+                            _serialPort.StopBits = StopBits.One;
+                        break;
                         case "1.5":
-                            stopBitsMapped = "One5";
+                            _serialPort.StopBits = StopBits.OnePointFive;  // 正確枚舉值
                             break;
                         case "2":
-                            stopBitsMapped = "Two";
+                            _serialPort.StopBits = StopBits.Two;
                             break;
-                        default:
-                            throw new ArgumentException("無效的停止位設定");
-                    }
-                    _serialPort.StopBits = (StopBits)Enum.Parse(typeof(StopBits), stopBitsMapped);
 
-                    
+                    }
+
+
                     /**設定流量控制*/
 
                     // 處理流量控制
@@ -230,6 +266,7 @@ namespace ComPort_Charp
                         case "None": // 新增處理「None」的情況
                             handshake = Handshake.None;
                             break;
+
                         default:
                             MessageBox.Show("不支援此流量控制模式");
                             return;
@@ -277,113 +314,69 @@ namespace ComPort_Charp
         /// </summary>
         /// 
 
-
-
-        private StringBuilder _receiveBuffer = new StringBuilder(); // 類別層級變數
-
-        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
-            try
-            {
-                // 讀取二進制資料（確保 UTF-8 完整解碼）
-                int bytesToRead = _serialPort.BytesToRead;
-                byte[] buffer = new byte[bytesToRead];
-                _serialPort.Read(buffer, 0, bytesToRead);
-                string data = Encoding.UTF8.GetString(buffer);
-
-                _receiveBuffer.Append(data);
-
-                // 支持 \r\n 或 \n 結尾（不修改原始資料）
-                int newLineIndex = _receiveBuffer.ToString().IndexOf('\n');
-                while (newLineIndex != -1)
-                {
-                    // 提取完整行（包含換行符）
-                    string line = _receiveBuffer.ToString(0, newLineIndex + 1);
-                    _receiveBuffer.Remove(0, newLineIndex + 1);
-
-                    // 直接使用原始換行符，僅轉換為 Windows 標準換行
-                    line = line.Replace("\r\n", "\n").Replace("\n", "\r\n");
-
-                    BeginInvoke(new Action(() =>
-                    {
-                        textBoxOutput.AppendText(line);
-                        textBoxOutput.ScrollToCaret();
-                    }));
-
-                    newLineIndex = _receiveBuffer.ToString().IndexOf('\n');
-                }
-            }
-            catch (Exception ex)
-            {
-                BeginInvoke(new Action(() =>
-                    MessageBox.Show($"接收錯誤: {ex.Message}")));
-            }
-        }
-
-
-#if SerialPort_DataReceived_V2
-
-        private StringBuilder _receiveBuffer = new StringBuilder();
+        //</0411 修改>
+        private readonly object _bufferLock = new object();  // 緩衝區操作鎖
+        private readonly StringBuilder _receiveBuffer = new StringBuilder();
 
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             try
             {
+                // 1. 讀取原始數據
                 int bytesToRead = _serialPort.BytesToRead;
                 byte[] buffer = new byte[bytesToRead];
                 _serialPort.Read(buffer, 0, bytesToRead);
-                string data = Encoding.UTF8.GetString(buffer); // 使用 UTF-8 解碼
 
+                // 2. 解碼並處理換行符
+                string rawData = Encoding.UTF8.GetString(buffer);
+                string processedData = ProcessLineBreaks(rawData);
 
-                //string data = _serialPort.ReadExisting();
-                _receiveBuffer.Append(data);
-
-                // 支持 \r\n 或 \n 結尾
-                int newLineIndex = _receiveBuffer.ToString().IndexOf('\n');
-                while (newLineIndex != -1)
+                // 3. 安全寫入緩衝區
+                lock (_bufferLock)
                 {
-                    // 提取一行（包含換行符）
-                    string line = _receiveBuffer.ToString().Substring(0, newLineIndex + 1);
-                    _receiveBuffer.Remove(0, newLineIndex + 1);
-
-                    // 統一轉換為 \r\n 顯示
-                    line = line.Replace("\r", "").Replace("\n", "\r\n");
-
-                    BeginInvoke(new Action(() =>
-                    {
-                        textBoxOutput.AppendText(line);
-                        textBoxOutput.ScrollToCaret(); // 自動滾動到底部
-                    }));
-
-                    newLineIndex = _receiveBuffer.ToString().IndexOf('\n');
+                    _receiveBuffer.Append(processedData);
                 }
+
+                // 4. 觸發單一 UI 更新
+                BeginInvoke(new Action(ProcessReceivedData));
             }
             catch (Exception ex)
             {
-                BeginInvoke(new Action(() =>
-                    MessageBox.Show($"接收錯誤: {ex.Message}")));
+                // 5. 統一錯誤處理
+                WriteDebugLog("error.log", $"ERROR: {ex}");
             }
         }
-#endif
 
-#if SerialPort_DataReceived_V1
-        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+
+        private void ProcessReceivedData()
         {
-           try
-           {
-            // 接收到數據後顯示
-            string data = _serialPort.ReadExisting();
-
-             // 使用 BeginInvoke 避免 UI 卡住
-            BeginInvoke(new Action(() => HandleReceivedData(data)));
-            }
-                catch (Exception ex)
+            lock (_bufferLock)
             {
-                MessageBox.Show("讀取串口數據時發生錯誤：" + ex.Message, "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                // 避免無效操作
+                if (_receiveBuffer.Length == 0) {
+                    return;
+                }
+               
+                // 新增此行：將緩衝區數據傳遞給 HandleReceivedData
+                HandleReceivedData(_receiveBuffer.ToString());
+
+                // 6. 更新 UI 並清空緩衝區
+                //textBoxOutput.AppendText(_receiveBuffer.ToString());
+                textBoxOutput.ScrollToCaret();
+                _receiveBuffer.Clear();
             }
-            
         }
-#endif
+
+        // 7. 換行符統一處理方法
+        private string ProcessLineBreaks(string input)
+        {
+            return input
+                .Replace("\r\n", "\n")  // 統一為 LF
+                .Replace("\r", "\n")    // 處理舊版 Mac 換行符
+                .Replace("\n", "\r\n"); // 轉為 Windows 標準換行符
+        }
+        //</0411 修改>
+
         /// <summary>
         /// 處理接收到的數據，顯示並記錄（若錄製中）
         /// </summary>
@@ -398,13 +391,15 @@ namespace ComPort_Charp
             }
 
             textBoxOutput.AppendText(data); // 顯示接收到的訊息
-            //textBoxOutput.AppendText(data + Environment.NewLine); // **確保換行**
 
 
-            // 如果錄製中，則寫入日誌
-            if (isRecording && _logWriter != null)
+            lock (_logLock) // 需在類別中定義 private readonly object _logLock = new object();
             {
-                _logWriter.Write(data);
+                if (isRecording && _logWriter != null)
+                {
+                    _logWriter.Write(data);
+                    _logWriter.Flush(); // 強制寫入檔案
+                }
             }
         }
 
@@ -492,7 +487,7 @@ namespace ComPort_Charp
 
         private void TextBoxIn_TextChanged(object sender, EventArgs e)
         {
-
+            //File.AppendAllText("debug_text_changed.log", $"[{DateTime.Now}] Text 變更\n");
         }
 
         private void BtnSyncTime_Click(object sender, EventArgs e)
@@ -510,7 +505,7 @@ namespace ComPort_Charp
                 byte[] packet = CreateTimeSyncPacket(now);
 
                 _serialPort.Write(packet, 0, packet.Length);
-                textBoxOutput.AppendText($"已发送时间同步数据：{now.ToString("yyyy-MM-dd HH:mm:ss")}\r\n");
+                textBoxOutput.AppendText($"已发送时间同步数据：{now:yyyy-MM-dd HH:mm:ss}\r\n");
             }
             catch (Exception ex)
             {
@@ -523,6 +518,13 @@ namespace ComPort_Charp
         {
 
             // 协议格式：SYNC_TIME,yyyy,MM,dd,HH,mm,ss,checksum
+            string payload = $"{time.Year}," +
+                 $"{time.Month:D2}," +
+                 $"{time.Day:D2}," +
+                 $"{time.Hour:D2}," +
+                 $"{time.Minute:D2}," +
+                 $"{time.Second:D2}";
+            /*
             string payload = $"SYNC_TIME," +
                              $"{time.Year}," +
                              $"{time.Month:D2}," +
@@ -530,6 +532,7 @@ namespace ComPort_Charp
                              $"{time.Hour:D2}," +
                              $"{time.Minute:D2}," +
                              $"{time.Second:D2}";
+            */
 
             // 计算校验和（简单求和校验）
             byte checksum = CalculateChecksum(payload);
@@ -550,5 +553,191 @@ namespace ComPort_Charp
             return sum;
         }
     }
+
+
+    ///舊碼區
+    ///
+
+#if modify0410
+        //<0410 修改>
+
+        private readonly object _bufferLock = new object(); // 緩衝區操作鎖
+        private StringBuilder _receiveBuffer = new StringBuilder();
+
+        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            try
+            {
+                // 讀取數據
+                int bytesToRead = _serialPort.BytesToRead;
+                byte[] buffer = new byte[bytesToRead];
+                _serialPort.Read(buffer, 0, bytesToRead);
+
+
+                // 使用鎖保護緩衝區
+                lock (_bufferLock)
+                {
+                    _receiveBuffer.Append(Encoding.UTF8.GetString(buffer));
+                }
+
+                // 觸發 UI 更新
+                BeginInvoke(new Action(ProcessReceivedData));
+
+                // 顯示到 UI（UTF-8 解碼）
+                string data = Encoding.UTF8.GetString(buffer);
+                BeginInvoke(new Action(() =>
+                {
+                    textBoxOutput.AppendText(data);
+                    textBoxOutput.ScrollToCaret();
+                }));
+            }
+            catch (Exception ex)
+            {
+                
+                WriteDebugLog("error.log", $"ERROR:{ex}");
+                lock (_logLock)
+                {
+                    WriteDebugLog("error.log", $"[{DateTime.Now}] LOCK:{ex}");
+                    
+                }
+            }
+        }
+
+        private void ProcessReceivedData()
+        {
+            lock (_bufferLock)
+            {
+                textBoxOutput.AppendText(_receiveBuffer.ToString());
+                _receiveBuffer.Clear();
+                textBoxOutput.ScrollToCaret();
+            }
+        }
+        //</0410 修改>
+#endif
+
+#if sd
+
+        private StringBuilder _receiveBuffer = new StringBuilder(); // 類別層級變數
+
+        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            
+            try
+            {
+                // 讀取二進制資料（確保 UTF-8 完整解碼）
+                int bytesToRead = _serialPort.BytesToRead;
+                byte[] buffer = new byte[bytesToRead];
+                _serialPort.Read(buffer, 0, bytesToRead);
+                //string data = Encoding.UTF8.GetString(buffer);
+                string data = Encoding.Unicode.GetString(buffer);
+
+                _receiveBuffer.Append(data);
+
+                // 支持 \r\n 或 \n 結尾（不修改原始資料）
+                int newLineIndex = _receiveBuffer.ToString().IndexOf('\n');
+                while (newLineIndex != -1)
+                {
+                    // 提取完整行（包含換行符）
+                    string line = _receiveBuffer.ToString(0, newLineIndex + 1);
+                    _receiveBuffer.Remove(0, newLineIndex + 1);
+
+                    // 直接使用原始換行符，僅轉換為 Windows 標準換行
+                    line = line.Replace("\r\n", "\n").Replace("\n", "\r\n");
+
+                    BeginInvoke(new Action(() =>
+                    {
+                        string hex = BitConverter.ToString(buffer);
+                        File.AppendAllText("debug_hex.log", $"[{DateTime.Now}] HEX: {hex}\n");
+
+                        File.AppendAllText("debug_output_update.log", $"[{DateTime.Now}] 更新內容: {data}\n");
+                        
+                        textBoxOutput.AppendText(line);
+                        textBoxOutput.ScrollToCaret();
+
+                        //File.AppendAllText("debug_output_update.log",$"[{DateTime.Now}] 更新內容: {data}\n");
+
+
+                        //textBoxOutput.Refresh(); // 強制重繪控制項
+                        // 新增偵錯日誌
+                        //File.AppendAllText("debug_ui.log", $"[{DateTime.Now}] UI 更新內容: {data}\n");
+                    }));
+
+                    newLineIndex = _receiveBuffer.ToString().IndexOf('\n');
+                }
+            }
+            catch (Exception ex)
+            {
+                BeginInvoke(new Action(() =>
+                    MessageBox.Show($"接收錯誤: {ex.Message}")));
+            }
+        }
+#endif
+
+
+#if SerialPort_DataReceived_V2
+
+        private StringBuilder _receiveBuffer = new StringBuilder();
+
+        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            try
+            {
+                int bytesToRead = _serialPort.BytesToRead;
+                byte[] buffer = new byte[bytesToRead];
+                _serialPort.Read(buffer, 0, bytesToRead);
+                string data = Encoding.UTF8.GetString(buffer); // 使用 UTF-8 解碼
+
+
+                //string data = _serialPort.ReadExisting();
+                _receiveBuffer.Append(data);
+
+                // 支持 \r\n 或 \n 結尾
+                int newLineIndex = _receiveBuffer.ToString().IndexOf('\n');
+                while (newLineIndex != -1)
+                {
+                    // 提取一行（包含換行符）
+                    string line = _receiveBuffer.ToString().Substring(0, newLineIndex + 1);
+                    _receiveBuffer.Remove(0, newLineIndex + 1);
+
+                    // 統一轉換為 \r\n 顯示
+                    line = line.Replace("\r", "").Replace("\n", "\r\n");
+
+                    BeginInvoke(new Action(() =>
+                    {
+                        textBoxOutput.AppendText(line);
+                        textBoxOutput.ScrollToCaret(); // 自動滾動到底部
+                    }));
+
+                    newLineIndex = _receiveBuffer.ToString().IndexOf('\n');
+                }
+            }
+            catch (Exception ex)
+            {
+                BeginInvoke(new Action(() =>
+                    MessageBox.Show($"接收錯誤: {ex.Message}")));
+            }
+        }
+#endif
+
+#if SerialPort_DataReceived_V1
+        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+           try
+           {
+            // 接收到數據後顯示
+            string data = _serialPort.ReadExisting();
+
+             // 使用 BeginInvoke 避免 UI 卡住
+            BeginInvoke(new Action(() => HandleReceivedData(data)));
+            }
+                catch (Exception ex)
+            {
+                MessageBox.Show("讀取串口數據時發生錯誤：" + ex.Message, "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            
+        }
+#endif
+
+
 
 }
