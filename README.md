@@ -1,3 +1,15 @@
+#V4.11
+4/11
+1. 因為不明原因出錯,導致程式收不到訊息.
+2. 在Program.cs下，新增全域異常處裡
+3. 新增private void WriteDebugLog(string fileName, string message)方法；將錯誤資料記錄到../debuglog目錄下
+
+未測試項目
+1. 硬體流量控制只確定能用None和Xon/Xoff，RTS/CTS和 DTR/DSR沒測試過；因為用不到，所以懶得去測試。
+
+Todo list
+- HEX輸出
+
 #第二版發行 2025/03/27
   * git好聰明,我上傳後可以幫我把上一版的程式更新為第二版的程式!!!
     軟體工程師應該覺得沒什麼,但我可是硬體工程師啊~~而且我還是第一次用git!
