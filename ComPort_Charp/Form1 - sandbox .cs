@@ -94,11 +94,8 @@ namespace ComPort_Charp
             // 自動建立日誌目錄（如果不存在）
             Directory.CreateDirectory(_debugFolderPath);
             //</0410 測試碼>
-#if Checkbox_0428
+            
             this.checkBox1.CheckedChanged += new System.EventHandler(this.CheckBoxHex_CheckedChanged);
-
-#endif
-
         }
 
 
@@ -155,10 +152,9 @@ namespace ComPort_Charp
             // 統一使用字串填充波特率
             board_rat.Items.AddRange(new object[] { 9600, 19200, 38400, 57600, 115200, 256000 });
             comport.Items.AddRange(SerialPort.GetPortNames());
-            board_rat.Items.AddRange(new object[] { "9600", "19200", "38400", "57600", "115200" });
+            //board_rat.Items.AddRange(new object[] { "9600", "19200", "38400", "57600", "115200" });
             Data_Bit.Items.AddRange(new object[] { "5", "6", "7", "8" });
             Stop_Bits.Items.AddRange(new object[] { "1", "1.5", "2" });
-            //Stop_Bits.Items.AddRange(new object[] { "One", "One5", "Two" });
             Parity.Items.AddRange(new object[] { "None", "Odd", "Even", "Mark", "Space" });
             Flow_Control.Items.AddRange(new object[] { "None", "XOnXOff", "RTS/CTS", "DTR/DSR" });
             ReadTimeout.Items.AddRange(new object[] { "100", "500", "1000", "2000", "5000" });
@@ -211,11 +207,7 @@ namespace ComPort_Charp
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            /** 在ComboBox中填充所有串口名稱*/
-            //comport.Items.AddRange(SerialPort.GetPortNames());
-#if Checkbox_0428
-            //checkBox1.Checked = false;
-#endif
+           
 
         }
 
@@ -354,7 +346,7 @@ namespace ComPort_Charp
                 _serialPort.Read(buffer, 0, bytesToRead);
                 //string processedData;
 
-#if Checkbox_0428
+
                 /**
                  * 2. 解碼並處理換行符
                  * 
@@ -384,55 +376,8 @@ namespace ComPort_Charp
            // 5. 統一錯誤處理
                 WriteDebugLog("error.log", $"ERROR: {ex}");
             }
+        }
 
-#elif CheckBox_debug1
-                // 2. 根據 CheckBox 切換 HEX / ASCII 模式
-                //if (checkBox1.Checked)                {
-                // 以 HEX 顯示（加上換行）
-                //string hexString = BitConverter.ToString(buffer).Replace("-", " ") + Environment.NewLine;
-
-                // 3. 安全寫入緩衝區
-                //lock (_bufferLock)
-                //{
-                // _hexBuffer.Append(hexString);
-                //}
-                //}
-                //else
-                //{
-                // ASCII 解碼 + 換行處理（原本邏輯）
-                //string rawData = Encoding.UTF8.GetString(buffer);
-                //processedData = ProcessLineBreaks(rawData);
-
-                // 3. 安全寫入緩衝區
-                //lock (_bufferLock)
-                //{
-                //        _receiveBuffer.Append(processedData);
-                //}
-                //}
-#elif org_
-                 // 原本邏輯（沒啟用切換）
-                string rawData = Encoding.UTF8.GetString(buffer);
-                string processedData = ProcessLineBreaks(rawData);
-
-                lock (_bufferLock)
-                 {
-                    _receiveBuffer.Append(processedData);
-                 }
-            // 2. 解碼並處理換行符
-            //string rawData = Encoding.UTF8.GetString(buffer);
-            //string processedData = ProcessLineBreaks(rawData);
-// 4. 觸發單一 UI 更新
-            BeginInvoke(new Action(ProcessReceivedData));
-            }
-            catch (Exception ex)
-            {
-                // 5. 統一錯誤處理
-                WriteDebugLog("error.log", $"ERROR: {ex}");
-            }
-#endif
-
-}
-#if Checkbox_0428
 
 private void CheckBoxHex_CheckedChanged(object sender, EventArgs e)
         {
@@ -450,58 +395,34 @@ private void CheckBoxHex_CheckedChanged(object sender, EventArgs e)
             {
                 // 關閉 HEX 模式，只顯示 ASCII
                 textBoxHex.Visible = false;
+                //textBoxOutput.Width = this.ClientSize.Width - textBoxOutput.Left;
                 textBoxOutput.Width = this.ClientSize.Width - textBoxOutput.Left;
             }
+            ProcessReceivedData();
         }
 
-#endif
-
-
-#if Checkbox_0428
+        /**
+         * 同時更新textBox
+         * 因為兩個textBox，所以需要兩個緩衝區_receiveBuffer和_hexBuffer；
+         * 所以，同樣的事情必須要做兩次
+        */
         private void ProcessReceivedData()
         {
             lock (_bufferLock)
             {
-                if (_receiveBuffer.Length > 0)
-                {
+                if (_receiveBuffer.Length > 0){
                     textBoxOutput.AppendText(_receiveBuffer.ToString());
-                    textBoxHex.AppendText(_hexBuffer.ToString());
                     _receiveBuffer.Clear();
-                    _hexBuffer.Clear();
-                }   
-                else
-                {
-                    if (checkBox1.Checked && _hexBuffer.Length > 0)                
-                    {
-                    
-                        textBoxHex.AppendText(_hexBuffer.ToString());                    
-                        _hexBuffer.Clear();                
-                    }            
-                }            
-            }
-            //Console.WriteLine($"ASCII buffer: {_receiveBuffer.ToString()}");
-        }
-
-#else
-        private void ProcessReceivedData()
-        {
-            lock (_bufferLock)
-            {
-                // 避免無效操作
-                if (_receiveBuffer.Length == 0) {
-                    return;
                 }
-               
-                // 新增此行：將緩衝區數據傳遞給 HandleReceivedData
-                HandleReceivedData(_receiveBuffer.ToString());
-
-                // 6. 更新 UI 並清空緩衝區
-                //textBoxOutput.AppendText(_receiveBuffer.ToString());
-                textBoxOutput.ScrollToCaret();
-                _receiveBuffer.Clear();
+                if (_hexBuffer.Length > 0)
+                {
+                    textBoxHex.AppendText(_hexBuffer.ToString());
+                    _hexBuffer.Clear();
+                }
             }
         }
-#endif
+
+
 
         // 7. 換行符統一處理方法
         private string ProcessLineBreaks(string input)
@@ -690,187 +611,6 @@ private void CheckBoxHex_CheckedChanged(object sender, EventArgs e)
 
     ///舊碼區
     ///
-
-#if modify0410
-        //<0410 修改>
-
-        private readonly object _bufferLock = new object(); // 緩衝區操作鎖
-        private StringBuilder _receiveBuffer = new StringBuilder();
-
-        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
-            try
-            {
-                // 讀取數據
-                int bytesToRead = _serialPort.BytesToRead;
-                byte[] buffer = new byte[bytesToRead];
-                _serialPort.Read(buffer, 0, bytesToRead);
-
-
-                // 使用鎖保護緩衝區
-                lock (_bufferLock)
-                {
-                    _receiveBuffer.Append(Encoding.UTF8.GetString(buffer));
-                }
-
-                // 觸發 UI 更新
-                BeginInvoke(new Action(ProcessReceivedData));
-
-                // 顯示到 UI（UTF-8 解碼）
-                string data = Encoding.UTF8.GetString(buffer);
-                BeginInvoke(new Action(() =>
-                {
-                    textBoxOutput.AppendText(data);
-                    textBoxOutput.ScrollToCaret();
-                }));
-            }
-            catch (Exception ex)
-            {
-                
-                WriteDebugLog("error.log", $"ERROR:{ex}");
-                lock (_logLock)
-                {
-                    WriteDebugLog("error.log", $"[{DateTime.Now}] LOCK:{ex}");
-                    
-                }
-            }
-        }
-
-        private void ProcessReceivedData()
-        {
-            lock (_bufferLock)
-            {
-                textBoxOutput.AppendText(_receiveBuffer.ToString());
-                _receiveBuffer.Clear();
-                textBoxOutput.ScrollToCaret();
-            }
-        }
-        //</0410 修改>
-#endif
-
-#if sd
-
-        private StringBuilder _receiveBuffer = new StringBuilder(); // 類別層級變數
-
-        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
-            
-            try
-            {
-                // 讀取二進制資料（確保 UTF-8 完整解碼）
-                int bytesToRead = _serialPort.BytesToRead;
-                byte[] buffer = new byte[bytesToRead];
-                _serialPort.Read(buffer, 0, bytesToRead);
-                //string data = Encoding.UTF8.GetString(buffer);
-                string data = Encoding.Unicode.GetString(buffer);
-
-                _receiveBuffer.Append(data);
-
-                // 支持 \r\n 或 \n 結尾（不修改原始資料）
-                int newLineIndex = _receiveBuffer.ToString().IndexOf('\n');
-                while (newLineIndex != -1)
-                {
-                    // 提取完整行（包含換行符）
-                    string line = _receiveBuffer.ToString(0, newLineIndex + 1);
-                    _receiveBuffer.Remove(0, newLineIndex + 1);
-
-                    // 直接使用原始換行符，僅轉換為 Windows 標準換行
-                    line = line.Replace("\r\n", "\n").Replace("\n", "\r\n");
-
-                    BeginInvoke(new Action(() =>
-                    {
-                        string hex = BitConverter.ToString(buffer);
-                        File.AppendAllText("debug_hex.log", $"[{DateTime.Now}] HEX: {hex}\n");
-
-                        File.AppendAllText("debug_output_update.log", $"[{DateTime.Now}] 更新內容: {data}\n");
-                        
-                        textBoxOutput.AppendText(line);
-                        textBoxOutput.ScrollToCaret();
-
-                        //File.AppendAllText("debug_output_update.log",$"[{DateTime.Now}] 更新內容: {data}\n");
-
-
-                        //textBoxOutput.Refresh(); // 強制重繪控制項
-                        // 新增偵錯日誌
-                        //File.AppendAllText("debug_ui.log", $"[{DateTime.Now}] UI 更新內容: {data}\n");
-                    }));
-
-                    newLineIndex = _receiveBuffer.ToString().IndexOf('\n');
-                }
-            }
-            catch (Exception ex)
-            {
-                BeginInvoke(new Action(() =>
-                    MessageBox.Show($"接收錯誤: {ex.Message}")));
-            }
-        }
-#endif
-
-
-#if SerialPort_DataReceived_V2
-
-        private StringBuilder _receiveBuffer = new StringBuilder();
-
-        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
-            try
-            {
-                int bytesToRead = _serialPort.BytesToRead;
-                byte[] buffer = new byte[bytesToRead];
-                _serialPort.Read(buffer, 0, bytesToRead);
-                string data = Encoding.UTF8.GetString(buffer); // 使用 UTF-8 解碼
-
-
-                //string data = _serialPort.ReadExisting();
-                _receiveBuffer.Append(data);
-
-                // 支持 \r\n 或 \n 結尾
-                int newLineIndex = _receiveBuffer.ToString().IndexOf('\n');
-                while (newLineIndex != -1)
-                {
-                    // 提取一行（包含換行符）
-                    string line = _receiveBuffer.ToString().Substring(0, newLineIndex + 1);
-                    _receiveBuffer.Remove(0, newLineIndex + 1);
-
-                    // 統一轉換為 \r\n 顯示
-                    line = line.Replace("\r", "").Replace("\n", "\r\n");
-
-                    BeginInvoke(new Action(() =>
-                    {
-                        textBoxOutput.AppendText(line);
-                        textBoxOutput.ScrollToCaret(); // 自動滾動到底部
-                    }));
-
-                    newLineIndex = _receiveBuffer.ToString().IndexOf('\n');
-                }
-            }
-            catch (Exception ex)
-            {
-                BeginInvoke(new Action(() =>
-                    MessageBox.Show($"接收錯誤: {ex.Message}")));
-            }
-        }
-#endif
-
-#if SerialPort_DataReceived_V1
-        private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
-           try
-           {
-            // 接收到數據後顯示
-            string data = _serialPort.ReadExisting();
-
-             // 使用 BeginInvoke 避免 UI 卡住
-            BeginInvoke(new Action(() => HandleReceivedData(data)));
-            }
-                catch (Exception ex)
-            {
-                MessageBox.Show("讀取串口數據時發生錯誤：" + ex.Message, "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            
-        }
-#endif
-
 
 
 }
