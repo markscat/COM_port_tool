@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @file Form.c
  * @brief 串口通訊工具
  * @author Chergpt and Ethan 
@@ -100,48 +100,6 @@ namespace ComPort_Charp
 #endif
 
         }
-#if Checkbox_0428
-
-        private void CheckBoxHex_CheckedChanged(object sender, EventArgs e)
-        {
-            // 清除現有顯示內容
-            //textBoxOutput.Clear();
-            if (checkBox1.Checked)
-            {
-                // 顯示 HEX 模式（分欄）
-                textBoxHex.Visible = true;
-                textBoxOutput.Width = this.ClientSize.Width / 2;
-                textBoxHex.Width = this.ClientSize.Width / 2;
-                textBoxHex.Left = textBoxOutput.Right;
-                //textBoxHex.Clear();
-
-                // 強制將目前的緩衝內容顯示出來
-                lock (_bufferLock)
-                {
-                    if (_hexBuffer.Length > 0)
-                        textBoxHex.AppendText(_hexBuffer.ToString());
-                    _hexBuffer.Clear(); // 避免重複印
-
-                }
-            }
-            else
-            {
-                // 關閉 HEX 模式，只顯示 ASCII
-                textBoxHex.Visible = false;
-                textBoxOutput.Width = this.ClientSize.Width - textBoxOutput.Left;
-                // 強制將 ASCII 資料刷新
-                lock (_bufferLock)
-                {
-                    if (_receiveBuffer.Length > 0)
-                        textBoxOutput.AppendText(_receiveBuffer.ToString());
-                    _receiveBuffer.Clear();
-
-                }
-            }
-
-        }
-
-#endif
 
 
         //<0410 新增;寫入除錯資訊>
@@ -256,7 +214,7 @@ namespace ComPort_Charp
             /** 在ComboBox中填充所有串口名稱*/
             //comport.Items.AddRange(SerialPort.GetPortNames());
 #if Checkbox_0428
-            checkBox1.Checked = false;
+            //checkBox1.Checked = false;
 #endif
 
         }
@@ -388,40 +346,70 @@ namespace ComPort_Charp
         {
             try
             {
-                // 1. 讀取原始數據
+                //參數設定
                 int bytesToRead = _serialPort.BytesToRead;
                 byte[] buffer = new byte[bytesToRead];
+
+                // 1. 從串列埠讀取原始數據;把原始資料放到buffer中
                 _serialPort.Read(buffer, 0, bytesToRead);
+                //string processedData;
 
 #if Checkbox_0428
-                string processedData;
+                /**
+                 * 2. 解碼並處理換行符
+                 * 
+                 * 先把Buffer中的資料轉換之後，放到rawData
+                 * 然後把rawData中的資料轉換成ASCII的編碼
+                 */
+                string rawData = Encoding.UTF8.GetString(buffer);
+                string processedAscii = ProcessLineBreaks(rawData);
 
+                /**
+                 * 將buffer中的資料轉換成字串
+                 */
+                // HEX 顯示格式
+                string processedHex = BitConverter.ToString(buffer).Replace("-", " ") + Environment.NewLine;
+
+                lock (_bufferLock)
+                {
+                    _receiveBuffer.Append(processedAscii);
+                    _hexBuffer.Append(processedHex);
+                }
+
+                BeginInvoke(new Action(ProcessReceivedData));
+            }
+            // 4. 觸發單一 UI 更新
+            catch (Exception ex)
+            {
+           // 5. 統一錯誤處理
+                WriteDebugLog("error.log", $"ERROR: {ex}");
+            }
+
+#elif CheckBox_debug1
                 // 2. 根據 CheckBox 切換 HEX / ASCII 模式
-                if (checkBox1.Checked)
-                {
-                    // 以 HEX 顯示（加上換行）
-                    //processedData = BitConverter.ToString(buffer).Replace("-", " ") + Environment.NewLine;
-                    string hexString = BitConverter.ToString(buffer).Replace("-", " ") + Environment.NewLine;
+                //if (checkBox1.Checked)                {
+                // 以 HEX 顯示（加上換行）
+                //string hexString = BitConverter.ToString(buffer).Replace("-", " ") + Environment.NewLine;
 
-                    // 3. 安全寫入緩衝區
-                    lock (_bufferLock)
-                    {
-                        _hexBuffer.Append(hexString);
-                    }
-                }
-                else
-                {
-                    // ASCII 解碼 + 換行處理（原本邏輯）
-                    string rawData = Encoding.UTF8.GetString(buffer);
-                    processedData = ProcessLineBreaks(rawData);
+                // 3. 安全寫入緩衝區
+                //lock (_bufferLock)
+                //{
+                // _hexBuffer.Append(hexString);
+                //}
+                //}
+                //else
+                //{
+                // ASCII 解碼 + 換行處理（原本邏輯）
+                //string rawData = Encoding.UTF8.GetString(buffer);
+                //processedData = ProcessLineBreaks(rawData);
 
-                    // 3. 安全寫入緩衝區
-                    lock (_bufferLock)
-                    {
-                        _receiveBuffer.Append(processedData);
-                    }
-                }
-#else
+                // 3. 安全寫入緩衝區
+                //lock (_bufferLock)
+                //{
+                //        _receiveBuffer.Append(processedData);
+                //}
+                //}
+#elif org_
                  // 原本邏輯（沒啟用切換）
                 string rawData = Encoding.UTF8.GetString(buffer);
                 string processedData = ProcessLineBreaks(rawData);
@@ -430,54 +418,69 @@ namespace ComPort_Charp
                  {
                     _receiveBuffer.Append(processedData);
                  }
-
-#endif
-
-
-                // 2. 解碼並處理換行符
-                //string rawData = Encoding.UTF8.GetString(buffer);
-                //string processedData = ProcessLineBreaks(rawData);
-
-
-
-                // 4. 觸發單一 UI 更新
-                BeginInvoke(new Action(ProcessReceivedData));
+            // 2. 解碼並處理換行符
+            //string rawData = Encoding.UTF8.GetString(buffer);
+            //string processedData = ProcessLineBreaks(rawData);
+// 4. 觸發單一 UI 更新
+            BeginInvoke(new Action(ProcessReceivedData));
             }
             catch (Exception ex)
             {
                 // 5. 統一錯誤處理
                 WriteDebugLog("error.log", $"ERROR: {ex}");
             }
+#endif
+
+}
+#if Checkbox_0428
+
+private void CheckBoxHex_CheckedChanged(object sender, EventArgs e)
+        {
+            // 清除現有顯示內容
+            //textBoxOutput.Clear();
+            if (checkBox1.Checked)
+            {
+                // 顯示 HEX 模式（分欄）
+                textBoxHex.Visible = true;
+                textBoxOutput.Width = this.ClientSize.Width / 2;
+                textBoxHex.Width = this.ClientSize.Width / 2;
+                textBoxHex.Left = textBoxOutput.Right;
+            }
+            else
+            {
+                // 關閉 HEX 模式，只顯示 ASCII
+                textBoxHex.Visible = false;
+                textBoxOutput.Width = this.ClientSize.Width - textBoxOutput.Left;
+            }
         }
+
+#endif
+
 
 #if Checkbox_0428
         private void ProcessReceivedData()
         {
             lock (_bufferLock)
             {
-                if (checkBox1.Checked)
+                if (_receiveBuffer.Length > 0)
                 {
-                    if (_hexBuffer.Length > 0)
-                    {
-                        textBoxHex.AppendText(_hexBuffer.ToString());
-                        _hexBuffer.Clear();
-                    }
-                }
+                    textBoxOutput.AppendText(_receiveBuffer.ToString());
+                    textBoxHex.AppendText(_hexBuffer.ToString());
+                    _receiveBuffer.Clear();
+                    _hexBuffer.Clear();
+                }   
                 else
                 {
-                    if (_receiveBuffer.Length > 0)
+                    if (checkBox1.Checked && _hexBuffer.Length > 0)                
                     {
-                        textBoxOutput.AppendText(_receiveBuffer.ToString());
-                        _receiveBuffer.Clear();
-                    }
-                }
+                    
+                        textBoxHex.AppendText(_hexBuffer.ToString());                    
+                        _hexBuffer.Clear();                
+                    }            
+                }            
             }
-            Console.WriteLine($"ASCII buffer: {_receiveBuffer.ToString()}");
+            //Console.WriteLine($"ASCII buffer: {_receiveBuffer.ToString()}");
         }
-
-
-
-
 
 #else
         private void ProcessReceivedData()
