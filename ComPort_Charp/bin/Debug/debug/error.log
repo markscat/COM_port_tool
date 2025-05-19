@@ -1,0 +1,6 @@
+2025-05-16 16:22:54 ERROR in SerialPort_DataReceived: 拒絕存取通訊埠。 
+StackTrace:    於 System.IO.Ports.InternalResources.WinIOError(Int32 errorCode, String str)
+   於 System.IO.Ports.InternalResources.WinIOError()
+   於 System.IO.Ports.SerialStream.get_BytesToRead()
+   於 System.IO.Ports.SerialPort.get_BytesToRead()
+   於 ComPort_Charp.Form1.SerialPort_DataReceived(Object sender, SerialDataReceivedEventArgs e) 於 D:\for work\temp\workshorp\PC\comport\ComPort_Charp-0410\ComPort_Charp\Form1.cs: 行 405

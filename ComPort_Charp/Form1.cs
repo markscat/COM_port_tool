@@ -70,6 +70,7 @@ using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 using System.Text.RegularExpressions;
+using System.Security.Policy;
 
 namespace ComPort_Charp
 { /// <summary>
@@ -92,16 +93,20 @@ namespace ComPort_Charp
         /// 表示是否正在記錄使用者輸入。
         /// </summary>
         private bool isRecording = false;
+
         /// <summary>
         /// 用於同步處理日誌寫入的鎖定物件。
         /// </summary>
         private readonly object _logLock = new object(); // 日誌寫入鎖
+
         /// <summary>
         /// 日誌檔案所儲存的資料夾路徑。
         /// </summary>
         private readonly string _debugFolderPath; // 日誌目錄路徑
 
         private readonly StringBuilder _hexBuffer = new StringBuilder();
+
+
 
 
         /// <summary>
@@ -111,7 +116,7 @@ namespace ComPort_Charp
         {
             InitializeComponent();
             InitializeSerialPort();
-            _logLock = new object(); // 新增此行
+            //_logLock = new object(); // 新增此行
 
             //<0410 測試碼>
             //debug報告
@@ -387,6 +392,8 @@ namespace ComPort_Charp
         /// 
 
         //</0411 修改>
+
+
         private readonly object _bufferLock = new object();  // 緩衝區操作鎖
         private readonly StringBuilder _receiveBuffer = new StringBuilder();
 
@@ -397,7 +404,38 @@ namespace ComPort_Charp
                 //參數設定
                 int bytesToRead = _serialPort.BytesToRead;
                 byte[] buffer = new byte[bytesToRead];
+                int bytesActuallyRead = _serialPort.Read(buffer, 0, bytesToRead); // 獲取實際讀取的字節數
 
+
+                if (bytesToRead == 0) {
+                    // 沒有數據可讀
+                    return; 
+                }
+
+                if (bytesActuallyRead == 0) {
+                    return; // 再次確認是否真的讀到數據
+                }
+
+                // 1. 將原始數據轉換為 UTF8 (或您期望的串口編碼) 字串，用於後續處理和可能的日誌記錄
+                //    這裡使用 UTF8 是因為您的 _serialPort.Encoding 預設為 UTF8
+                string rawDataString = Encoding.UTF8.GetString(buffer, 0, bytesActuallyRead);
+
+                // 2. 處理換行符，得到用於顯示和記錄的 ASCII (處理後的) 字符串
+                string processedAsciiForDisplayAndLog = ProcessLineBreaks(rawDataString);
+
+                // 3. 處理 HEX 顯示 (僅用於 UI)
+                string processedHexForDisplay = BitConverter.ToString(buffer, 0, bytesActuallyRead).Replace("-", " ") + Environment.NewLine;
+
+                lock (_bufferLock)
+                {
+                    //_receiveBuffer.Append(processedAscii);
+                    //_hexBuffer.Append(processedHex);
+
+                    _receiveBuffer.Append(processedAsciiForDisplayAndLog);
+                    _hexBuffer.Append(processedHexForDisplay);
+                }
+
+#if modify_0516
                 // 1. 從串列埠讀取原始數據;把原始資料放到buffer中
                 _serialPort.Read(buffer, 0, bytesToRead);
                 //string processedData;
@@ -417,25 +455,68 @@ namespace ComPort_Charp
                  */
                 // HEX 顯示格式
                 string processedHex = BitConverter.ToString(buffer).Replace("-", " ") + Environment.NewLine;
-
                 lock (_bufferLock)
                 {
                     _receiveBuffer.Append(processedAscii);
                     _hexBuffer.Append(processedHex);
                 }
+#endif
 
+                // 5. 調用 HandleReceivedData 將 ASCII 數據寫入日誌 (如果正在錄製)
+                //    這個方法內部會處理 InvokeRequired 和 _logLock
+                HandleReceivedData(processedAsciiForDisplayAndLog);
+
+                // 6. 觸發 UI 更新
                 BeginInvoke(new Action(ProcessReceivedData));
             }
             // 4. 觸發單一 UI 更新
             catch (Exception ex)
             {
-           // 5. 統一錯誤處理
-                WriteDebugLog("error.log", $"ERROR: {ex}");
+                // 5. 統一錯誤處理
+                WriteDebugLog("error.log", $"ERROR in SerialPort_DataReceived: {ex.Message} \nStackTrace: {ex.StackTrace}");
+
+            }
+        }
+
+        private void HandleReceivedData(string asciiDataToLog)
+        {
+            if (string.IsNullOrEmpty(asciiDataToLog)) // 如果數據為空，則不記錄
+            {
+                return;
+            }
+
+            // 確保在正確的線程操作 _logWriter (雖然 StreamWriter 本身是線程安全的，但 isRecording 的讀取和 _logWriter 的賦值可能需要同步)
+            // 但考慮到 isRecording 和 _logWriter 主要在 UI 線程修改，這裡的檢查和寫入可以認為在 DataReceived 線程是相對安全的，
+            // 除非 BuRecord_Click 被非常頻繁地調用。 _logLock 主要保護 _logWriter 的寫操作。
+            if (isRecording && _logWriter != null)
+            {
+                lock (_logLock)
+                {
+                    // 再次檢查，以防在進入 lock 前狀態改變
+                    if (isRecording && _logWriter != null)
+                    {
+                        try
+                        {
+                            _logWriter.Write(asciiDataToLog);
+                            // _logWriter.Flush(); // AutoFlush = true 時，這行可以省略，但保留也無妨
+                        }
+                        catch (Exception ex)
+                        {
+                            // 處理日誌寫入錯誤，可以寫入 debug 日誌
+                            WriteDebugLog("log_write_error.log", $"Error writing to log via HandleReceivedData: {ex.Message}");
+                        }
+                    }
+                }
             }
         }
 
 
-private void CheckBoxHex_CheckedChanged(object sender, EventArgs e)
+
+
+
+
+
+        private void CheckBoxHex_CheckedChanged(object sender, EventArgs e)
         {
             // 清除現有顯示內容
             //textBoxOutput.Clear();
@@ -454,7 +535,7 @@ private void CheckBoxHex_CheckedChanged(object sender, EventArgs e)
                 //textBoxOutput.Width = this.ClientSize.Width - textBoxOutput.Left;
                 textBoxOutput.Width = this.ClientSize.Width - textBoxOutput.Left;
             }
-            ProcessReceivedData();
+            //ProcessReceivedData();
         }
 
         /**
@@ -470,9 +551,22 @@ private void CheckBoxHex_CheckedChanged(object sender, EventArgs e)
                     textBoxOutput.AppendText(_receiveBuffer.ToString());
                     _receiveBuffer.Clear();
                 }
+
                 if (_hexBuffer.Length > 0)
                 {
                     textBoxHex.AppendText(_hexBuffer.ToString());
+                    _hexBuffer.Clear();
+                }
+
+
+                if (checkBox1.Checked && _hexBuffer.Length > 0)
+                {
+                    textBoxHex.AppendText(_hexBuffer.ToString());
+                    _hexBuffer.Clear();
+                }
+                else if (!checkBox1.Checked && _hexBuffer.Length > 0)
+                {
+                    // 如果不是 HEX 模式，但 HEX buffer 裡有東西，清空它
                     _hexBuffer.Clear();
                 }
             }
@@ -490,12 +584,13 @@ private void CheckBoxHex_CheckedChanged(object sender, EventArgs e)
         }
         //</0411 修改>
 
+#if modify_0516
         /// <summary>
         /// 處理接收到的數據，顯示並記錄（若錄製中）
         /// </summary>
         /// <param name="data">接收到的數據</param>
 
-        private void HandleReceivedData(string data)
+        private void HandleReceivedData(string asciiDataToLog)
         {
             if (InvokeRequired)
             {
@@ -516,6 +611,8 @@ private void CheckBoxHex_CheckedChanged(object sender, EventArgs e)
             }
         }
 
+
+#endif
         private void BuRecord_Click(object sender, EventArgs e)
         {
             if (!_serialPort.IsOpen)
@@ -531,52 +628,93 @@ private void CheckBoxHex_CheckedChanged(object sender, EventArgs e)
                     string logFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logfile");
                     Directory.CreateDirectory(logFolder);
                     string logFileName = Path.Combine(logFolder,
-                        $"log_{DateTime.Now.ToString("MM_dd_HH_mm_ss", CultureInfo.InvariantCulture)}.txt");
+                                                $"log_{DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture)}.txt"); // 建議的檔名格式，按字母排序即按時間排序
+
+                    // $"log_{DateTime.Now.ToString("MM_dd_HH_mm_ss", CultureInfo.InvariantCulture)}.txt");
 
                     // 处理文件访问冲突
                     try
                     {
-                        _logWriter = new StreamWriter(logFileName, true);
+                        _logWriter = new StreamWriter(logFileName, true, Encoding.UTF8)
+                        {
+                            AutoFlush = true // 在成功創建後設置 AutoFlush
+                        };
+                        /**等同於
+                         * 
+                         * _logWriter = new StreamWriter(logFileName, true, Encoding.UTF8);
+                         * _logWriter.AutoFlush = true; // 在成功創建後設置 AutoFlush
+                         */
                     }
-                    catch (IOException)
+                    catch (IOException ioEx)
                     {
-                        MessageBox.Show("日志文件被其他程序占用，请关闭后重试。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
+
+                        MessageBox.Show($"日誌文件 '{Path.GetFileName(logFileName)}' 被其他程序占用或無法訪問，请关闭后重试。\n錯誤: {ioEx.Message}", "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        // 不需要再賦值給 _logWriter，因為它未能成功創建
+                        return; // 結束錄製流程
                     }
 
-                    _logWriter.AutoFlush = true;
+
+                    isRecording = true;
+                    BuRecord.Text = "Stop";
+
+                    // 創建 StreamWriter
+                    //logWriter = new StreamWriter(logFileName, true, Encoding.UTF8); // true for append, 明確指定編碼
+                    //_logWriter.AutoFlush = true;
+
+                    //isRecording = true; // 在成功打開 StreamWriter 後再設置 isRecording
+                    // BuRecord.Text = "Stop"; // 更新按鈕文字 (建議在UI線程更新，但此處通常問題不大)
+                                            // BeginInvoke(new Action(() => BuRecord.Text = "Stop")); // 更安全的UI更新方式
+
+                    //_logWriter.AutoFlush = true;
 
                     // 安全更新 UI
+                    /*
                     BeginInvoke(new Action(() =>
                     {
                         isRecording = true;
                         BuRecord.Text = "Stop";
-                    }));
+                    }));*/
+
                 }
                 catch (IOException ex)
                 {
                     MessageBox.Show($"文件寫入失敗: {ex.Message}", "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // 清理可能已部分創建的 _logWriter
+                    _logWriter?.Dispose();
+                    _logWriter = null;
+                    isRecording = false; // 重置狀態
                 }
+
+
                 catch (UnauthorizedAccessException ex)
                 {
                     MessageBox.Show($"無權限訪問日誌目錄: {ex.Message}", "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    //isRecording = false; // 重置狀態
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show($"無法開始錄製：{ex.Message}", "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    _logWriter?.Dispose();
+                    _logWriter = null;
+                    //isRecording = false;
                 }
             }
-            else
+            else // 停止錄製
             {
-                _logWriter?.Dispose(); // 确保资源释放
-                _logWriter = null;
+                isRecording = false; // 先改變狀態，避免在關閉過程中仍有數據嘗試寫入
+                //BuRecord.Text = "Record"; // 更新按鈕文字 (建議在UI線程更新)
+                BeginInvoke(new Action(() => BuRecord.Text = "Record"));
 
-                // 安全更新 UI
-                BeginInvoke(new Action(() =>
+
+
+                //使用 lock 確保在 Dispose 時沒有其他線程在 Write
+                lock (_logLock)
                 {
-                    isRecording = false;
-                    BuRecord.Text = "Record";
-                }));
+                    _logWriter?.Flush(); // 確保所有緩衝數據已寫入
+                    _logWriter?.Dispose(); // 确保资源释放
+                    _logWriter = null;
+                }
+
             }
         }
 

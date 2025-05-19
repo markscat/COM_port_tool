@@ -123,7 +123,7 @@ namespace ComPort_Charp
             this.textBoxOutput.Name = "textBoxOutput";
             this.textBoxOutput.ReadOnly = true;
             this.textBoxOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBoxOutput.Size = new System.Drawing.Size(350, 434);
+            this.textBoxOutput.Size = new System.Drawing.Size(350, 416);
             this.textBoxOutput.TabIndex = 4;
             this.textBoxOutput.SizeChanged += new System.EventHandler(this.Form1_Load);
             // 
@@ -309,7 +309,7 @@ namespace ComPort_Charp
             this.textBoxHex.Name = "textBoxHex";
             this.textBoxHex.ReadOnly = true;
             this.textBoxHex.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBoxHex.Size = new System.Drawing.Size(350, 434);
+            this.textBoxHex.Size = new System.Drawing.Size(352, 416);
             this.textBoxHex.TabIndex = 24;
             this.textBoxHex.Visible = false;
             // 
