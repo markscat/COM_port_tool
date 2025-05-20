@@ -254,20 +254,30 @@ namespace ComPort_Charp
 
         private void UpdateLayoutByMode()
         {
+            
+            if (panelDisplayArea == null) return; // 防禦性程式碼
+
             if (checkBox1.Checked)
             {
                 // 切換到 HEX 模式，畫面分一半
-                int halfWidth = this.ClientSize.Width / 2;
+                int halfWidth = this.panelDisplayArea.Width / 2;
 
-                textBoxOutput.SetBounds(0, textBoxOutput.Top, halfWidth, textBoxOutput.Height);
-                textBoxHex.SetBounds(halfWidth, textBoxHex.Top, halfWidth, textBoxHex.Height);
+                textBoxOutput.SetBounds(0, 0, halfWidth, panelDisplayArea.ClientSize.Height);
+                textBoxHex.SetBounds(halfWidth, 0, halfWidth, panelDisplayArea.ClientSize.Height);
+
+                //textBoxOutput.SetBounds(0, textBoxOutput.Top, halfWidth, textBoxOutput.Height);
+                //textBoxHex.SetBounds(halfWidth, textBoxHex.Top, halfWidth, textBoxHex.Height);
 
                 textBoxHex.Visible = true;
             }
             else
             {
+
+                // textBoxOutput 填滿 panelDisplayArea
+                textBoxOutput.SetBounds(0, 0, panelDisplayArea.ClientSize.Width, panelDisplayArea.ClientSize.Height);
+                
                 // 切換到 ASCII 模式，Output 佔滿寬度
-                textBoxOutput.SetBounds(0, textBoxOutput.Top, this.ClientSize.Width, textBoxOutput.Height);
+                //textBoxOutput.SetBounds(0, textBoxOutput.Top, this.ClientSize.Width, textBoxOutput.Height);
                 textBoxHex.Visible = false;
             }
         }
