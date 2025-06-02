@@ -56,6 +56,8 @@ namespace ComPort_Charp
             this.BtnSyncTime = new System.Windows.Forms.Button();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.textBoxHex = new System.Windows.Forms.TextBox();
+            this.panelDisplayArea = new System.Windows.Forms.Panel();
+            this.panelDisplayArea.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -90,7 +92,7 @@ namespace ComPort_Charp
             // 
             this.board_rat.FormattingEnabled = true;
             this.board_rat.IntegralHeight = false;
-            this.board_rat.Location = new System.Drawing.Point(134, 60);
+            this.board_rat.Location = new System.Drawing.Point(173, 59);
             this.board_rat.Name = "board_rat";
             this.board_rat.Size = new System.Drawing.Size(109, 23);
             this.board_rat.TabIndex = 3;
@@ -108,7 +110,7 @@ namespace ComPort_Charp
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(131, 42);
+            this.label2.Location = new System.Drawing.Point(170, 42);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(112, 15);
             this.label2.TabIndex = 6;
@@ -116,14 +118,12 @@ namespace ComPort_Charp
             // 
             // textBoxOutput
             // 
-            this.textBoxOutput.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.textBoxOutput.Location = new System.Drawing.Point(7, 89);
+            this.textBoxOutput.Location = new System.Drawing.Point(3, 3);
             this.textBoxOutput.Multiline = true;
             this.textBoxOutput.Name = "textBoxOutput";
             this.textBoxOutput.ReadOnly = true;
             this.textBoxOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBoxOutput.Size = new System.Drawing.Size(350, 416);
+            this.textBoxOutput.Size = new System.Drawing.Size(357, 426);
             this.textBoxOutput.TabIndex = 4;
             this.textBoxOutput.SizeChanged += new System.EventHandler(this.Form1_Load);
             // 
@@ -302,21 +302,31 @@ namespace ComPort_Charp
             // 
             // textBoxHex
             // 
-            this.textBoxHex.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBoxHex.Location = new System.Drawing.Point(360, 89);
+            this.textBoxHex.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxHex.Location = new System.Drawing.Point(367, 3);
             this.textBoxHex.Multiline = true;
             this.textBoxHex.Name = "textBoxHex";
             this.textBoxHex.ReadOnly = true;
             this.textBoxHex.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBoxHex.Size = new System.Drawing.Size(352, 416);
+            this.textBoxHex.Size = new System.Drawing.Size(357, 426);
             this.textBoxHex.TabIndex = 24;
             this.textBoxHex.Visible = false;
+            // 
+            // panelDisplayArea
+            // 
+            this.panelDisplayArea.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.panelDisplayArea.Controls.Add(this.textBoxOutput);
+            this.panelDisplayArea.Controls.Add(this.textBoxHex);
+            this.panelDisplayArea.Location = new System.Drawing.Point(7, 89);
+            this.panelDisplayArea.Name = "panelDisplayArea";
+            this.panelDisplayArea.Size = new System.Drawing.Size(727, 434);
+            this.panelDisplayArea.TabIndex = 25;
             // 
             // Form1
             // 
             this.ClientSize = new System.Drawing.Size(877, 581);
-            this.Controls.Add(this.textBoxHex);
+            this.Controls.Add(this.panelDisplayArea);
             this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.BtnSyncTime);
             this.Controls.Add(this.label9);
@@ -337,13 +347,14 @@ namespace ComPort_Charp
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.comport);
-            this.Controls.Add(this.textBoxOutput);
             this.Controls.Add(this.board_rat);
             this.Controls.Add(this.BuClear);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.BuConnect);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
+            this.panelDisplayArea.ResumeLayout(false);
+            this.panelDisplayArea.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -377,6 +388,7 @@ namespace ComPort_Charp
         private System.Windows.Forms.Button BtnSyncTime;
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.TextBox textBoxHex;
+        private System.Windows.Forms.Panel panelDisplayArea;
     }
 }
 
