@@ -1,12 +1,22 @@
-4/10
-1. �]��������]�X��,�ɭP�{��������T��.
-2. �bProgram.cs�U�A�s�W���첧�`�B��
-3. �s�Wprivate void WriteDebugLog(string fileName, string message)��k�F�N���~��ưO����../debuglog�ؿ��U
+ *2025/5/1 更新紀錄
+ *  -新增ＨＥＸ轉換功能.
+ *   點擊右上方『HEX』核取方塊,TextBox會分成兩個;一個顯示ascii，一個顯示十六進位值
+ *  -目前問題：
+ * 　1. (已解決) 在按下『HEX』核取方塊之後，雖然畫面確實有切割，但是HEX顯示區塊會跑到右邊的設定區塊
+ * 　   (已解決) 在取消『HEX』模式之後,ascii區塊水平垂直的區塊會擴大為整個視窗
+ *      解決方法:
+ *      新增一個panel，把十六進位ascii的文字輸出框放到這個panel中．
+ *  2. 不知道還可以加什麼進去
 
-�����ն���
-1. �w��y�q����u�T�w���None�MXon/Xoff�ARTS/CTS�M DTR/DSR�S���չL�F�]���Τ���A�ҥH�i�o�h���աC
+4/10
+1. 因為不明原因出錯,導致程式收不到訊息.
+2. 在Program.cs下，新增全域異常處裡
+3. 新增private void WriteDebugLog(string fileName, string message)方法；將錯誤資料記錄到../debuglog目錄下
+
+未測試項目
+1. 硬體流量控制只確定能用None和Xon/Xoff，RTS/CTS和 DTR/DSR沒測試過；因為用不到，所以懶得去測試。
 
 Todo list
-- HEX��X
+- HEX輸出
 
 
