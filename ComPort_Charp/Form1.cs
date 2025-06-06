@@ -1,8 +1,26 @@
-﻿/**
- * @file Form.c
- * @brief 串口通訊工具
- * @author Chergpt and Ethan 
- * @date Feb 16, 2025
+﻿/*
+ * 
+ *版權：
+ *GNU GENERAL PUBLIC LICENSE
+ * Version 3, 29 June 2007
+ * Copyright (C) [2025] [Ethan]
+ * 本程式是一個自由軟體：您可以依照 **GNU 通用公共授權條款（GPL）** 發佈和/或修改，
+ * GPL 版本 3 或（依您選擇）任何更新版本。
+ * 
+ * 本程式的發佈目的是希望它對您有幫助，但 **不提供任何擔保**，甚至不包含適銷性或特定用途適用性的默示擔保。
+ * 請參閱 **GNU 通用公共授權條款** 以獲取更多詳細資訊。
+ * 您應當已經收到一份 **GNU 通用公共授權條款** 副本。
+ * 如果沒有，請參閱 <https://www.gnu.org/licenses/gpl-3.0.html>。  
+ * 
+ * 檔案:Form.cs
+ * 簡述:串口通訊工具
+ * 串列傳輸桌面應用程式
+ * 可設定連接埠、鮑率、傳送位元、流量控制、同位位元
+ * 可清除、紀錄訊息框的紀錄
+ * 支援Unicode
+ * 
+ * 作者:AI and Ethan 
+ * 日期： Feb 16, 2025
  *
  * Layout如下
  *  ┌──────────────────────────────────┐
@@ -23,37 +41,21 @@
  *  -新增ＨＥＸ轉換功能.
  *   點擊右上方『HEX』核取方塊,TextBox會分成兩個;一個顯示ascii，一個顯示十六進位值
  *  -目前問題：
- * 　在按下『HEX』核取方塊之後，雖然畫面確實有切割，但是HEX顯示區塊會跑到右邊的設定區塊
- * 　在取消『HEX』模式之後,ascii區塊水平垂直的區塊會擴大為整個視窗
- * 　雖然如此,我又不收你錢;堪用就好
- *   蛤?看不懂中文？
- *   你以為我在看你們那些英文法文德文日文克林貢文的時候就很輕鬆嗎？
- *   告訴我！我看不懂的時候，我可以嗆作者：你為什麼不用中文？
- *   
- *  
- *  
- *  
- * 串列傳輸桌面應用程式
- * 可設定連接埠、鮑率、傳送位元、流量控制、同位位元
- * 可清除、紀錄訊息框的紀錄
- * 支援Unicode
- * 
+ * 　(已解決) 在按下『HEX』核取方塊之後，雖然畫面確實有切割，但是HEX顯示區塊會跑到右邊的設定區塊
+ * 　(已解決) 在取消『HEX』模式之後,ascii區塊水平垂直的區塊會擴大為整個視窗
+ *
+ * * 
  * 其實這就是個爛大街的東西，github上一堆
  * 我會做這個的目的是想要做一個測試治具。
- * 這個程式不是很完美，應該還會有其他的問題；但這個就交給時間來決定吧。
- *
- *版權：
- *GNU GENERAL PUBLIC LICENSE
- * Version 3, 29 June 2007
- * Copyright (C) [2025] [Ethan]
- * 本程式是一個自由軟體：您可以依照 **GNU 通用公共授權條款（GPL）** 發佈和/或修改，
- * GPL 版本 3 或（依您選擇）任何更新版本。
+ * 這個程式不是很完美，應該還會有其他的問題；但這個就交給時間來決定吧。 *
+ * 我又不收你錢;堪用就好 
+ * 蛤?看不懂中文？
+ * 你以為我在看你們那些英文法文德文日文克林貢文的時候就很輕鬆嗎？
+ * 告訴我！我看不懂的時候，我可以嗆作者：你為什麼不用中文？
  * 
- * 本程式的發佈目的是希望它對您有幫助，但 **不提供任何擔保**，甚至不包含適銷性或特定用途適用性的默示擔保。
- * 請參閱 **GNU 通用公共授權條款** 以獲取更多詳細資訊。
- * 您應當已經收到一份 **GNU 通用公共授權條款** 副本。
- * 如果沒有，請參閱 <https://www.gnu.org/licenses/gpl-3.0.html>。  
  */
+
+
 #define Checkbox_0428
 using System;
 using System.Collections.Generic;
@@ -64,19 +66,42 @@ using System.Globalization;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Security.Policy;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
-using System.Text.RegularExpressions;
-using System.Security.Policy;
 
 namespace ComPort_Charp
-{ /// <summary>
-  /// 主窗體類別，負責串口通訊與 UI 交互
-  /// </summary>
-  /// 
+{
+    // C# 專用的 XML 註解，緊跟在類別定義之前，供 DocFX 等工具解析
+    /// <summary>
+    /// 串口通訊工具的主窗體類別，負責 UI 交互及底層串口通訊邏輯。
+    /// </summary>
+    /// <remarks>
+    /// 介面佈局如下：
+    /// ```text
+    ///  ┌──────────────────────────────────┐
+    ///  │ [通訊埠] [鮑率]      {連接} {清除}{紀錄}{RTC}    [ ] HEX 模式      │   
+    ///  ├────────────┬────────────┬────────┤
+    ///  │ ASCII 顯示             │ HEX 顯示               │ [Data bit]     │
+    ///  │                        │                        │ [stop bit]     │
+    ///  │                        │                        │ [Parity]       │
+    ///  │                        │                        │ [Flow Control] │
+    ///  │                        │                        │ [Read Timeout] │
+    ///  │                        │                        │ [Write Timeout]│
+    ///  └────────────┴────────────┴────────┘
+    ///  │                        輸出訊息                                    │
+    ///  └──────────────────────────────────┘
+    /// ```
+    /// 串列傳輸桌面應用程式，可設定連接埠、鮑率、傳送位元、流量控制、同位位元。
+    /// 支援清除、紀錄訊息框的紀錄。支援 Unicode。
+    /// 這其實是個爛大街的東西，目的是為了做一個測試治具。
+    /// 程式不是很完美，應該還有其他問題，但這就交給時間來決定吧。
+    /// </remarks>  
     public partial class Form1 : Form
     {
         /// <summary>
@@ -97,6 +122,7 @@ namespace ComPort_Charp
         /// <summary>
         /// 用於同步處理日誌寫入的鎖定物件。
         /// </summary>
+        
         private readonly object _logLock = new object(); // 日誌寫入鎖
 
         /// <summary>
@@ -107,8 +133,6 @@ namespace ComPort_Charp
         private readonly StringBuilder _hexBuffer = new StringBuilder();
 
 
-
-
         /// <summary>
         /// 構造函數，初始化組件與串口
         /// </summary>
@@ -116,28 +140,29 @@ namespace ComPort_Charp
         {
             InitializeComponent();
             InitializeSerialPort();
-            //_logLock = new object(); // 新增此行
 
             //<0410 測試碼>
             //debug報告
             //當出錯的時候,可以把錯誤報告丟到執行檔案之下的debug資料夾中
-
-            // CurrentDomain.BaseDirectory 執行檔所在目錄
             _debugFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"debug");
 
             // 自動建立日誌目錄（如果不存在）
             Directory.CreateDirectory(_debugFolderPath);
             //</0410 測試碼>
-            //SplitView(); // <--- 新增這一行
 
             this.checkBox1.CheckedChanged += new System.EventHandler(this.CheckBoxHex_CheckedChanged);
-
-
         }
 
 
         //<0410 新增;寫入除錯資訊>
-
+        /// <summary>
+        /// 寫入除錯資訊 
+        /// </summary>
+        /// <param name="fileName">儲存的檔名</param>
+        /// 
+        /// <param name="message">要儲存的訊息<see cref="FormClosingEventArgs"/></param>
+        /// 
+        /// 
         private void WriteDebugLog(string fileName, string message)
         {
             try
@@ -157,56 +182,103 @@ namespace ComPort_Charp
         //</0410 新增;寫入除錯資訊>
 
         /// <summary>
-        /// 
+        /// 處理主視窗關閉事件。
+        /// 在應用程式關閉前，確保所有相關資源（特別是串口連接和日誌檔案寫入器）被妥善關閉和釋放，
+        /// 以避免資源洩漏或檔案鎖定等問題。
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender">事件發送者（通常是 Form1 實例）。</param>
+        /// <param name="e">包含關閉事件資料的<see cref="FormClosingEventArgs"/>
+        /// </param>
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
+        {    
+            // 如果串口物件存在且已開啟，則先取消訂閱 DataReceived 事件。
+            // 這很重要，可以避免在串口關閉過程中，因收到殘餘數據而觸發事件，導致潛在的錯誤。
+            // 之後安全地關閉串口連接。
             if (_serialPort.IsOpen)
             {
+                // 取消訂閱事件
                 _serialPort.DataReceived -= SerialPort_DataReceived;
+                // 關閉串口
                 _serialPort.Close();
+                // _serialPort.Dispose(); // 對 SerialPort 而言，Close() 通常已足夠釋放大部分資源
+                // 但若要徹底釋放所有託管與非託管資源，可額外呼叫 Dispose()
             }
-            _logWriter?.Close(); // 確保紀錄檔案關閉
+            // 確保日誌寫入器在視窗關閉前被正確關閉。
+            // 使用 lock 確保在關閉 _logWriter 時，沒有其他執行緒正在嘗試寫入日誌，
+            // 這能保證數據的完整性和避免競爭條件。
+            
+            //_logWriter?.Close(); // 確保紀錄檔案關閉
+
+            lock (_logLock)
+            {
+                _logWriter?.Flush(); // 將所有緩衝中的數據寫入檔案
+                _logWriter?.Close(); // 關閉 Stream，同時也會呼叫 Dispose() 釋放檔案句柄
+                _logWriter = null;   // 清除對已關閉物件的引用
+            }
         }
- 
+
 
         /// <summary>
-        /// 初始化串口與 UI 元件
+        /// 初始化串口通訊物件以及相關的 UI 控制項。
         /// </summary>
-        /*!
-         *  Initializes the serial port.
-         */
+        /// <remarks>
+        /// 此方法負責設定串口物件的預設編碼為 UTF8。
+        /// 同時，它會填充以下 ComboBox 控制項的選項並設定其預設值：
+        /// <list type="bullet">
+        ///   <item><term>通訊埠 (comport)</term><description>自動偵測系統所有可用的 COM 埠，並預設選擇第一個。</description></item>
+        ///   <item><term>鮑率 (board_rat)</term><description>提供常用鮑率選項，預設為 9600。</description></item>
+        ///   <item><term>資料位元 (Data_Bit)</term><description>提供 5, 6, 7, 8 位元選項，預設為 8 位元。</description></item>
+        ///   <item><term>停止位元 (Stop_Bits)</term><description>提供 1, 1.5, 2 位元選項，預設為 1 位元。</description></item>
+        ///   <item><term>同位位元 (Parity)</term><description>提供 None, Odd, Even, Mark, Space 選項，預設為 None。</description></item>
+        ///   <item><term>流量控制 (Flow_Control)</term><description>提供 None, XOnXOff, RTS/CTS, DTR/DSR 選項，預設為 XOnXOff。</description></item>
+        ///   <item><term>讀取超時 (ReadTimeout)</term><description>提供多個超時時間選項（毫秒），預設為 100 毫秒。</description></item>
+        ///   <item><term>寫入超時 (WriteTimeout)</term><description>提供多個超時時間選項（毫秒），預設為 100 毫秒。</description></item>
+        /// </list>
+        /// 此外，它還將輸入文字框 <c>TextBoxIn</c> 的 <c>KeyDown</c> 事件綁定到 <c>TextBoxIn_KeyDown</c> 方法，
+        /// 以便處理使用者按下 Enter 鍵發送訊息的操作。
+        /// </remarks> 
+        ///
         private void InitializeSerialPort() {
             this.Text = "串口通訊工具"; // 設定視窗標題
-
+            
             _serialPort = new SerialPort
             {
                 Encoding = Encoding.UTF8
             };
 
-            // 統一使用字串填充波特率
+            //鮑率 (board_rat),提供常用鮑率選項，預設為 9600。
             board_rat.Items.AddRange(new object[] { 9600, 19200, 38400, 57600, 115200, 256000 });
+
+            // 通訊埠 (comport),自動偵測系統所有可用的 COM 埠，並預設選擇第一個
             comport.Items.AddRange(SerialPort.GetPortNames());
-            //board_rat.Items.AddRange(new object[] { "9600", "19200", "38400", "57600", "115200" });
+
+            //資料位元 (Data_Bit),提供 5, 6, 7, 8 位元選項，預設為 8 位元。
             Data_Bit.Items.AddRange(new object[] { "5", "6", "7", "8" });
+
+            //停止位元(Stop_Bits) ,提供 1, 1.5, 2 位元選項，預設為 1 位元。
             Stop_Bits.Items.AddRange(new object[] { "1", "1.5", "2" });
+
+            //同位位元(Parity) ,提供 None, Odd, Even, Mark, Space 選項，預設為 None。
             Parity.Items.AddRange(new object[] { "None", "Odd", "Even", "Mark", "Space" });
+
+            //流量控制 (Flow_Control), 提供 None, XOnXOff, RTS/CTS, DTR/DSR 選項，預設為 XOnXOff。
             Flow_Control.Items.AddRange(new object[] { "None", "XOnXOff", "RTS/CTS", "DTR/DSR" });
+
+            // (ReadTimeout) ,提供多個超時時間選項（毫秒），預設為 100 毫秒。
             ReadTimeout.Items.AddRange(new object[] { "100", "500", "1000", "2000", "5000" });
+
+            //寫入超時 (WriteTimeout),提供多個超時時間選項（毫秒），預設為 100 毫秒。
             WriteTimeout.Items.AddRange(new object[] { "100", "500", "1000", "2000", "5000" });
 
+            //參數預設區塊
             if (comport.Items.Count > 0) comport.SelectedIndex = 0;
             board_rat.SelectedIndex = 0;
             Data_Bit.SelectedIndex = 3;
             Stop_Bits.SelectedIndex = 0;
             Parity.SelectedIndex = 0;
-            Flow_Control.SelectedIndex = 1;
-            //board_rat.SelectedIndex = 0;
+            Flow_Control.SelectedIndex = 1;            
             ReadTimeout.SelectedIndex = 0;
-            WriteTimeout.SelectedIndex = 0;
-            //textBoxOutput.KeyDown += TextBoxOutput_KeyDown;
+            WriteTimeout.SelectedIndex = 0;            
             TextBoxIn.KeyDown += TextBoxIn_KeyDown;
 
         }
@@ -244,13 +316,8 @@ namespace ComPort_Charp
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            UpdateLayoutByMode();
-            
+            UpdateLayoutByMode();            
         }
-
-
-       
-
 
         private void UpdateLayoutByMode()
         {
@@ -283,11 +350,6 @@ namespace ComPort_Charp
         }
 
 
-        /// <summary>
-        /// 
-        /**  @brief	 BuConnect_Click 連接/斷開串口
-         *  </summary>
-        */
 
         private void BuConnect_Click(object sender, EventArgs e)
         {
@@ -445,33 +507,6 @@ namespace ComPort_Charp
                     _hexBuffer.Append(processedHexForDisplay);
                 }
 
-#if modify_0516
-                // 1. 從串列埠讀取原始數據;把原始資料放到buffer中
-                _serialPort.Read(buffer, 0, bytesToRead);
-                //string processedData;
-
-
-                /**
-                 * 2. 解碼並處理換行符
-                 * 
-                 * 先把Buffer中的資料轉換之後，放到rawData
-                 * 然後把rawData中的資料轉換成ASCII的編碼
-                 */
-                string rawData = Encoding.UTF8.GetString(buffer);
-                string processedAscii = ProcessLineBreaks(rawData);
-
-                /**
-                 * 將buffer中的資料轉換成字串
-                 */
-                // HEX 顯示格式
-                string processedHex = BitConverter.ToString(buffer).Replace("-", " ") + Environment.NewLine;
-                lock (_bufferLock)
-                {
-                    _receiveBuffer.Append(processedAscii);
-                    _hexBuffer.Append(processedHex);
-                }
-#endif
-
                 // 5. 調用 HandleReceivedData 將 ASCII 數據寫入日誌 (如果正在錄製)
                 //    這個方法內部會處理 InvokeRequired 和 _logLock
                 HandleReceivedData(processedAsciiForDisplayAndLog);
@@ -519,13 +554,6 @@ namespace ComPort_Charp
                 }
             }
         }
-
-
-
-
-
-
-
         private void CheckBoxHex_CheckedChanged(object sender, EventArgs e)
         {
             // 清除現有顯示內容
@@ -594,35 +622,7 @@ namespace ComPort_Charp
         }
         //</0411 修改>
 
-#if modify_0516
-        /// <summary>
-        /// 處理接收到的數據，顯示並記錄（若錄製中）
-        /// </summary>
-        /// <param name="data">接收到的數據</param>
 
-        private void HandleReceivedData(string asciiDataToLog)
-        {
-            if (InvokeRequired)
-            {
-                BeginInvoke(new Action(() => HandleReceivedData(data)));
-                return;
-            }
-
-            textBoxOutput.AppendText(data); // 顯示接收到的訊息
-
-
-            lock (_logLock) // 需在類別中定義 private readonly object _logLock = new object();
-            {
-                if (isRecording && _logWriter != null)
-                {
-                    _logWriter.Write(data);
-                    _logWriter.Flush(); // 強制寫入檔案
-                }
-            }
-        }
-
-
-#endif
         private void BuRecord_Click(object sender, EventArgs e)
         {
             if (!_serialPort.IsOpen)
@@ -663,28 +663,8 @@ namespace ComPort_Charp
                         return; // 結束錄製流程
                     }
 
-
                     isRecording = true;
                     BuRecord.Text = "Stop";
-
-                    // 創建 StreamWriter
-                    //logWriter = new StreamWriter(logFileName, true, Encoding.UTF8); // true for append, 明確指定編碼
-                    //_logWriter.AutoFlush = true;
-
-                    //isRecording = true; // 在成功打開 StreamWriter 後再設置 isRecording
-                    // BuRecord.Text = "Stop"; // 更新按鈕文字 (建議在UI線程更新，但此處通常問題不大)
-                                            // BeginInvoke(new Action(() => BuRecord.Text = "Stop")); // 更安全的UI更新方式
-
-                    //_logWriter.AutoFlush = true;
-
-                    // 安全更新 UI
-                    /*
-                    BeginInvoke(new Action(() =>
-                    {
-                        isRecording = true;
-                        BuRecord.Text = "Stop";
-                    }));*/
-
                 }
                 catch (IOException ex)
                 {
@@ -751,6 +731,11 @@ namespace ComPort_Charp
             //File.AppendAllText("debug_text_changed.log", $"[{DateTime.Now}] Text 變更\n");
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnSyncTime_Click(object sender, EventArgs e)
         {
             if (!_serialPort.IsOpen)
@@ -813,8 +798,6 @@ namespace ComPort_Charp
     }
 
 
-    ///舊碼區
-    ///
 
 
 }
