@@ -283,6 +283,7 @@ namespace ComPort_Charp
 
         }
 
+
         private void TextBoxOutput_KeyDown(object sender, KeyEventArgs e)
         {
             e.SuppressKeyPress = true;  // 防止任何鍵盤輸入影響 TextBoxOutput

@@ -1,0 +1,386 @@
+
+  ->[0] EEPROM 18051B00, 10022100, Last 00000000, 00000000 , SOC = 0
+        [B] [Save]  ==> Max ptr : 00 , SOC = 0
+  ->[1] EEPROM 01010100, 00000000, Last 18051B00, 10022100 , SOC = 0
+  ->[2] EEPROM 18051B00, 10022100, Last 18051B00, 10022100 , SOC = 0
+  ->[3] EEPROM 18051B00, 10022100, Last 18051B00, 10022100 , SOC = 0
+  ->[4] EEPROM 18051B00, 10022100, Last 18051B00, 10022100 , SOC = 0
+  ->[5] EEPROM 18051B00, 10022100, Last 18051B00, 10022100 , SOC = 0
+  ->[6] EEPROM 18051B00, 10022100, Last 18051B00, 10022100 , SOC = 0
+  -> eRTC_max_date_time_ptr = [00]
+  -> Now RTC : 2001-01-01 00:00:00 , Now SOC = 0
+     tmpRTC->temp_BMS_SOC = 0
+     Now RTC : 2001-01-01 00:00:00(    978278400 )
+     ROM RTC : 2024-05-27 16:02:33(   1716796953 )
+     DiffTimeStamp = (            0 )
+ ==> AFE_u0.Flag.Need_Voltage_to_SOC = true;^
+ # SoftStart
+ # uBMS.uSoftStart.PWM_ON();
+ --> [BAT] = 6, [Level] = 0150 [OK] [mcu_Vpackout] = [36884] 0521 [Diff] = 0000  [Counter] 00 
+--------> RPE_DSG (OK)..
+ SoftStart OK..
+ [CAN BUS] Command = 1, Return = 1, Data = 1{RST_AFE_F}{RST_DOC_F}
+{RST_COC_F} 
+--------> Run_CHG_OFF.. 
+--------> Run_mcu_CHG_OFF.. 
+--------> Ru
+ uBMS.DTF01.CAN.Data_Ready = falsen_DSG_ON.. 
+--------> Run_mcu_DSG_ON..
+ # uBMS.uSoftStart.PWM_OFF
+ # Enforce_Read_AFE^ 
+ uBMS.DTF01.CAN.Data_Ready = false
+ min cell(0) = 46
+ min cell(1) = 46
+ min cell(2) = 46
+ min cell(3) = 46
+ min cell(4) = 46
+ min cell(5) = 46
+ min cell(6) = 46
+ min cell(7) = 46
+ min cell(8) = 46
+ min cell(9) = 46
+ min cell(10) = 46
+ min cell(11) = 46
+ min cell(12) = 46
+ min cell(13) = 46
+ min cell(14) = 46
+ # Run AFE_Calc_Capacity_Real_Func();
+ # Run Reset_eCapacity_Func();[wEPROM OK]
+[wEPROM OK]
+[wEPROM OK]
+[wEPROM OK]
+[wEPROM OK]
+[wEPROM OK]
+[wEPROM OK]
+[wEPROM OK]
+[wEPROM OK]
+[wEPROM OK]
+[wEPROM OK]
+[wEPROM OK]
+[wEPROM OK]
+[wEPROM OK]
+[wEPROM OK]
+
+ SOC : ( V --> % ) then 0 (0.01%)
+ -> Spec(BySOH) = 210 AH, SOC = 0, 
+ -> tmp = Spec Capacity x SOC = 0
+ -> Real Capacity = tmp / 1000 = 0 AH 
+ -> Capacity = 00.00 AH
+    Capacity(Max) = 21.00 AH
+    Cell_ACC_Counter Coulomb : ACCQ = 0 ( Max = 0 )[wEPROM OK]
+[wEPROM OK]
+
+ uBMS.afe_error.error_Flag = true
+ uBMS.afe_error.error_counter = 0M(BMS)R
+ BMS initial done, get into [Main Loop]..
+ = = = = = = = = = = = = = = = = = = = =
+ Run_BMS_Error..M(BMS)
+ uBMS.DTF01.CAN.Data_Ready = false
+ uBMS.DTF01.CAN.Data_Ready = falseR
+ uBMS.afe_error.error_Flag = false!
+ min cell(0) = 46
+ min cell(1) = 46
+ min cell(2) = 46
+ min cell(3) = 46
+ min cell(4) = 46
+ min cell(5) = 46
+ min cell(6) = 46
+ min cell(7) = 46
+ min cell(8) = 46
+ min cell(9) = 46
+ min cell(10) = 46
+ min cell(11) = 46
+ min cell(12) = 46
+ min cell(13) = 46
+ min cell(14) = 46
+ uBMS.afe_error.error_Flag = true
+ uBMS.afe_error.error_counter = 1
+ Run_BMS_Error..M(BMS)R
+ uBMS.afe_error.error_Flag = false!
+ min cell(0) = 46
+ min cell(1) = 46
+ min cell(2) = 46
+ min cell(3) = 46
+ min cell(4) = 46
+ min cell(5) = 46
+ min cell(6) = 46
+ min cell(7) = 46
+ min cell(8) = 46
+ min cell(9) = 46
+ min cell(10) = 46
+ min cell(11) = 46
+ min cell(12) = 46
+ min cell(13) = 46
+ min cell(14) = 46
+ uBMS.afe_err
+ uBMS.DTF01.CAN.Data_Ready = falseor.error_Flag = true
+ uBMS.afe_error.error_counter = 2
+ Run_BMS_Error..
+ uBMS.DTF01.CAN.Data_Ready = false[C]
+ uBMS.afe_error.error_Flag = false!M(BMS)R
+ min cell(0) = 46
+ min cell(1) = 46
+ min cell(2) = 46
+ min cell(3) = 46
+ min cell(4) = 46
+ min cell(5) = 46
+ min cell(6) = 46
+ min cell(7) = 46
+ min cell(8) = 46
+ min cell(9) = 46
+ min cell(10) = 46
+ min cell(11) = 46
+ min cell(12) = 46
+ min cell(13) = 46
+ min cell(14) = 46
+ uBMS.afe_error.error_Flag = true
+ uBMS.afe_error.error_counter = 3
+ Run_BMS_Error..
+ uBMS.afe_error.error_Flag = false! 
+ min cell(0) = 46
+ min cell(1) = 46
+ min cell(2) = 46
+ min cell(3) = 46
+ min cell(4) = 46
+ min cell(5) = 46
+ min cell(6) = 46
+ min cell(7) = 46
+ min cell(8) = 46
+ min cell(9) = 46
+ min cell(10) = 46
+ min cell(11) = 46
+ min cell(12) = 46
+ min cell(13) = 46
+ min cell(14) = 46M(BMS)
+ uBMS.DTF01.CAN.Data_Ready = false
+ uBMS.DTF01.CAN.Data_Ready = falseR
+ uBMS.afe_error.error_Flag = true
+ uBMS.afe_error.error_counter = 4
+ uBMS.afe_error.error_counter = 0;
+ Device_XREADY_Clear
+ # void Run_BMS_ON_Func(void).. 
+--------> Run_CHG_ON.. 
+--------> Run_DSG_ON..
+ ==> Run_BMS_Keep_ON..
+ uBMS.afe_error.error_Flag = false!
+ min cell(0) = 46
+ min cell(1) = 46
+ min cell(2) = 46
+ min cell(3) = 46
+ min cell(4) = 46
+ min cell(5) = 46
+ min cell(6) = 46
+ min cell(7) = 46
+ min cell(8) = 46
+ min cell(9) = 46
+ min cell(10) = 46
+ min cell(11) = 46
+ min cell(12) = 46
+ min cell(13) = 46
+ min cell(14) = 46
+ uBMS.afe_error.error_Flag = true
+ uBMS.afe_error.error_counter = 0
+ Run_BMS_Error..[C]
+ uBMS.afe_error.error_Flag = false!
+ min cell(0) = 46
+ min cell(1) = 46
+ min cell(2) = 46
+ min cell(3) = 46
+ min cell(4) = 46
+ min cell(5) = 46
+ min cell(6) = 46
+ min cell(7) = 46
+ min cell(8) = 46
+ min cell(9) = 46
+ min cell(10) = 46
+ min cell(11) = 46
+ min cell(12) = 46
+ min cell(13) = 46
+ min cell(14) = 46
+ uBMS.afe_error.error_Flag 
+ uBMS.DTF01.CAN.Data_Ready = false= true
+ uBMS.afe_error.error_counter = 1
+ Run_BMS_Error..
+ uBMS.DTF01.CAN.Data_Ready = falseM(BMS)R
+ uBMS.afe_error.error_Flag = false!
+ min cell(0) = 46
+ min cell(1) = 46
+ min cell(2) = 46
+ min cell(3) = 46
+ min cell(4) = 46
+ min cell(5) = 46
+ min cell(6) = 46
+ min cell(7) = 46
+ min cell(8) = 46
+ min cell(9) = 46
+ min cell(10) = 46
+ min cell(11) = 46
+ min cell(12) = 46
+ min cell(13) = 46
+ min cell(14) = 46
+ uBMS.afe_error.error_Flag = true
+ uBMS.afe_error.error_counter = 2
+ Run_BMS_Error..
+ uBMS.afe_error.error_Flag = false! M(BMS)R
+ min cell(0) = 46
+ min cell(1) = 46
+ min cell(2) = 46
+ min cell(3) = 46
+ min cell(4) = 46
+ min cell(5) = 46
+ min ce
+ uBMS.DTF01.CAN.Data_Ready = falsell(6) = 46
+ min cell(7) = 46
+ min cell(8) = 46
+ min cell(9) = 46
+ min cell(10) = 46
+ min cell(11) = 46
+ min cell(12) = 46
+ min cell(13) = 46
+ min cell(14) = 46
+ uBMS.DTF01.CAN.Data_Ready = false
+ uBMS.afe_error.error_Flag = true
+ uBMS.afe_error.error_counter = 3
+ Run_BMS_Error..[C]
+ uBMS.afe_error.error_Flag = false!
+ min cell(0) = 46
+ min cell(1) = 46
+ min cell(2) = 46
+ min cell(3) = 46
+ min cell(4) = 46
+ min cell(5) = 46
+ min cell(6) = 46
+ min cell(7) = 46
+ min cell(8) = 46
+ min cell(9) = 46
+ min cell(10) = 46
+ min cell(11) = 46
+ min cell(12) = 46
+ min cell(13) = 46
+ min cell(14) = 46
+ uBMS.afe_error.error_Flag = true
+ uBMS.afe_error.error_counter = 4
+ uBMS.afe_error.error_counter = 0;
+ Device_XREADY_ClearM(BMS)R
+ uBMS.afe_error.error_Flag = false!
+ min cell(0) = 46
+ min cell(1) = 46
+ min cell(2) = 46
+ min cell(3) = 46
+ min cell(4) = 46
+ min cell(5) = 46
+ min cell(6) = 46
+ min cell(7) = 46
+ min cell(8) = 46
+ min cell(9) = 46
+ min cell(10) = 46
+ min cell(11) = 46
+ min cell(12) = 46
+ min cell(13) = 46
+ min cell(14) = 46
+ uBMS.afe_error.error_Flag = true
+ 
+ uBMS.DTF01.CAN.Data_Ready = falseuBMS.afe_error.error_counter = 0
+ Run_BMS_Error..
+ uBMS.DTF01.CAN.Data_Ready = falseM(BMS)R
+ uBMS.afe_error.error_Flag = false!
+ min cell(0) = 46
+ min cell(1) = 46
+ min cell(2) = 46
+ min cell(3) = 46
+ min cell(4) = 46
+ min cell(5) = 46
+ min cell(6) = 46
+ min cell(7) = 46
+ min cell(8) = 46
+ min cell(9) = 46
+ min cell(10) = 46
+ min cell(11) = 46
+ min cell(12) = 46
+ min cell(13) = 46
+ min cell(14) = 46
+ uBMS.afe_error.error_Flag = true
+ uBMS.afe_error.error_counter = 1
+ Run_BMS_Error..
+ uBMS.afe_error.error_Flag = false! M(BMS)R[C]
+ uBMS.DTF01.CAN.Data_Ready = false
+ min cell(0) = 46
+ min cell(1) = 46
+ min cell(2) = 46
+ min cell(3) = 46
+ min cell(4) = 46
+ min cell(5) = 46
+ min cell(6) = 46
+ min cell(7) = 46
+ min cell(8) = 46
+ min cell(9) = 46
+ min cell(10) = 46
+ uBMS.DTF01.CAN.Data_Ready = false
+ min cell(11) = 46
+ min cell(12) = 46
+ min cell(13) = 46
+ min cell(14) = 46
+ uBMS.afe_error.error_Flag = true
+ uBMS.afe_error.error_counter = 2
+ Run_BMS_Error..
+ uBMS.afe_error.error_Flag = false!
+ min cell(0) = 46
+ min cell(1) = 46
+ min cell(2) = 46
+ min cell(3) = 46
+ min cell(4) = 46
+ min cell(5) = 46
+ min cell(6) = 46
+ min cell(7) = 46
+ min cell(8) = 46
+ min cell(9) = 46
+ min cell(10) = 46
+ min cell(11) = 46
+ min cell(12) = 46
+ min cell(13) = 46
+ min cell(14) = 46
+ uBMS.afe_error.error_Flag = true
+ uBMS.afe_error.error_counter = 3
+ Run_BMS_Error..
+ uBMS.afe_error.error_Flag = false!
+ min cell(0) = 46
+ min cell(1) = 46
+ min cell(2) = 46
+ min cell(3) = 46
+ min cell(4) = 46
+ min cell(5) = 46
+ min cell(6) = 46
+ min cell(7) = 46
+ min cell(8) = 46
+ min cell(9) = 46
+ min cell(10) = 46
+ min cell(11) = 46
+ min cell(12) = 46
+ min cell(13) = 46
+ min cell(14) = 46
+ uBMS.afe_error.error_Flag = true
+ uBMS.afe_error.error_counter = 4
+ uBMS.DTF01.CAN.Data_Ready = false
+ uBMS.afe_error.error_counter = 0;
+ Device_XREADY_Clear
+ uBMS.DTF01.CAN.Data_Ready = falseM(BMS)R
+ uBMS.afe_error.error_Flag = false!
+ min cell(0) = 46
+ min cell(1) = 46
+ min cell(2) = 46
+ min cell(3) = 46
+ min cell(4) = 46
+ min cell(5) = 46
+ min cell(6) = 46
+ min cell(7) = 46
+ min cell(8) = 46
+ min cell(9) = 46
+ min cell(10) = 46
+ min cell(11) = 46
+ min cell(12) = 46
+ min cell(13) = 46
+ min cell(14) = 46
+ uBMS.afe_error.error_Flag = true
+ uBMS.afe_error.error_counter = 0
+ Run_BMS_Error..[C]
+ uBMS.afe_error.error_Flag = false! M(BMS)R
